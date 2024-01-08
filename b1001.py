@@ -1,0 +1,1 @@
+print((a:=list(map(int,input().split())))[0]-a[1])

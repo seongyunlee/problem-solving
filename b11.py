@@ -1,0 +1,1 @@
+print([int(1024/((1.25**(i-20)))) for i in range(40)])
