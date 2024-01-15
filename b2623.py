@@ -10,8 +10,8 @@ for l in L:
     for i in range(len(l)-1):
         f,t = l[i:i+2]
         parent[t].append(f)
-        child[f].append(t)
-visit = [False]*(N+1)
+        child[f].append(t)  
+visit = [False]*(N+1) 
 indegree = [len(parent[idx]) for idx in range(N+1)]
 Q = deque()
 ans = []
