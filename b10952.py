@@ -1,0 +1,1 @@
+while (x:=sum(map(int,input().split()))) !=0:print(x)
