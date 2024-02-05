@@ -1,25 +1,14 @@
 N,M=map(int,input().split())
-e={}
+D = [[N]*N for _ in range(N)]
 for _ in range(M):
     f,t=map(int,input().split())
-    if e.get(f):e[f].append(t)
-    else: e[f]=[t]
-    if e.get(t):e[t].append(f)
-    else: e[t]=[f]
-s=[]
-for i in range(1,N):
-    dis=[N+2]*(N+1)
-    dis[i]=0
-    node=[i]
-    d=1
-    while node:
-        next_node=[]
-        for now in node:
-            for f in e[now]:
-                if dis[f]>d:
-                    dis[f]=d
-                    next_node.append(f)
-        d+=1
-        node=next_node
-    s.append([sum(dis[1:]),i])
-print(min(s)[1])
+    D[f-1][t-1] = 1
+    D[t-1][f-1] = 1    
+for i in range(N):
+    D[i][i] = 0
+# floyd-warshall
+for k in range(N):
+    for i in range(N):
+        for j in range(N):
+            D[i][j] = min(D[i][j], D[i][k]+D[k][j])
+print(min([[sum(x),i] for i,x in enumerate(D)])[1]+1)
