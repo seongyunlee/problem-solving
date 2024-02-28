@@ -1,3 +1,4 @@
+from itertools import combinations
 import subprocess
 import random
 
@@ -13,6 +14,14 @@ def compare_outputs(output1, output2):
 
 def test_case_generator():
 
+    TC = []
+    
+    for i in range(1,11):
+        for k in combinations(range(0,10),i):
+           TC.append(str(i)+"\n"+' '.join(map(str,k))) 
+
+    return TC
+    '''
     T = 1
 
     test_case = []
@@ -22,36 +31,35 @@ def test_case_generator():
         if a<b: a,b = b,a
         test_case.append(str(a)+' '+str(b))
     #alphabet = "abcdefghijklmnopqrstuvwxyz".capitalize()
-
     return str(T)+'\n'+'\n'.join(test_case)
+    '''
 
-
+def is_prime(n):
+    if n<2: return False
+    for i in range(2,int(n**0.5)+1):
+        if n%i==0: return False
+    return True
 
 def run_one():
 
-    rep = 10000
+    rep = 1
 
-    script1_path = 'b9019.py'
+    script1_path = 'b31432.py'
+    test_cases = test_case_generator()
 
-    for i in range(rep):
+
+    for test_case in test_cases:
         # Compare the outputs
-        test_case = test_case_generator()
 
         # Run the first Python script
         output1, error1 = run_python_script(script1_path, test_case)
 
-        print(i+1,"/",rep)
-        if len(output1) < 5:
-            print("test_case:",test_case)
-            print("output1:",output1)
-        if error1:
-            print("Error in script1.py:")
-            print("-----test_case-----")
+        R = output1.split('\n')
+        if len(R)==1:
+            print("0->\n",test_case)
+        else:
             print(test_case)
-            print("-----error-----")
-            print(error1)
-            
-
+            print(R)
 def compare_two():
 
     rep = 1000
