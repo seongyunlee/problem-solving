@@ -1,24 +1,30 @@
 import sys
-input= sys.stdin.readline
-N,M=map(int,input().split())
-E=[list(map(int,input().split()))[::-1] for _ in range(M)]
-E.sort()
-P=[i for i in range(N+1)]
-S=0
-answer=0
-def findRoot(idx):
-    if idx==P[idx]:return idx
-    else: return findRoot(P[idx])
-for c,f,t in E:
-    fR=findRoot(f)
-    tR=findRoot(t)
-    if tR==fR:continue
-    S+=1
-    answer+=c
-    if fR<tR:
-        P[tR]=P[t]=P[f]=fR
-    elif fR>tR:
-        P[fR]=P[t]=P[f]=tR
-    if S==N-2:
-        break
-print(answer)
+from heapq import heappop,heappush
+input = sys.stdin.readline
+N,M = map(int,input().split())
+E = {i:[] for i in range(1,N+1)}
+for _ in range(M):
+    a,b,c = map(int,input().split())
+    E[a].append((c,b))
+    E[b].append((c,a))
+def makeMST(a):
+    visit = [False]*(N+1)
+    visit[a] = True
+    q = []
+    for e in E[a]:
+        heappush(q,e)
+    ans = 0
+    maxCost = 0
+    while q:
+        cost,child = heappop(q)
+        if not visit[child]:
+            visit[child] = True
+            ans += cost
+            maxCost = max(maxCost,cost)
+            for e in E[child]:
+                if not visit[e[1]]:
+                    heappush(q,e)
+    return ans-maxCost
+print(makeMST(1))
+
+
