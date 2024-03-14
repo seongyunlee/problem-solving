@@ -14,6 +14,9 @@ def compare_outputs(output1, output2):
 
 def test_case_generator():
 
+    item = 2000
+
+    return str(item)+"\n"+'\n'.join(' '.join([str(random.randint(0,10)) for _ in range(4)]) for _ in range(item))
     TC = []
     
     for i in range(1,11):
@@ -33,26 +36,22 @@ def test_case_generator():
     #alphabet = "abcdefghijklmnopqrstuvwxyz".capitalize()
     return str(T)+'\n'+'\n'.join(test_case)
     '''
-
-def is_prime(n):
-    if n<2: return False
-    for i in range(2,int(n**0.5)+1):
-        if n%i==0: return False
-    return True
-
 def run_one():
 
     rep = 1
 
-    script1_path = 'b31432.py'
+    script1_path = 'b2162.py'
     test_cases = test_case_generator()
-
+    print(test_cases)
 
     for test_case in test_cases:
         # Compare the outputs
 
         # Run the first Python script
         output1, error1 = run_python_script(script1_path, test_case)
+
+        print(output1)
+        break
 
         R = output1.split('\n')
         if len(R)==1:
@@ -62,7 +61,7 @@ def run_one():
             print(R)
 def compare_two():
 
-    rep = 1000
+    rep = 3000
 
     script1_path = 'b14003.py'
     script2_path = 'b14003-2.py'
