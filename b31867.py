@@ -1,0 +1,5 @@
+n = int(input())
+s = sum(1 if int(x)%2==0 else 0 for x in list(input()))
+if s > n-s: print("0")
+elif s < n-s: print("1")
+else: print("-1")
