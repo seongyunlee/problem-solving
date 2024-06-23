@@ -1,0 +1,5 @@
+N = int(input())
+L = list(map(int, input().split()))
+T, P = map(int, input().split())
+print(sum([l//T + (l%T > 0) for l in L]))
+print(N//P, N%P)
