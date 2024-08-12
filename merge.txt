@@ -1,0 +1,5132 @@
+C=[]
+T=[]
+E=[]
+cards=[]
+def possible(idx,num):
+    if len(C[idx])==0:
+        return (T[idx-1]//3+T[idx-1]%3//2+T[idx-1]%3%2)<=num<=T[idx-1]
+    base=num//len(C[idx])
+    remain=num%len(C[idx])
+    nums=[base + (1 if i<remain else 0) for i in range(len(C[idx]))]
+    for i in range(len(C[idx])):
+        if not possible(C[idx][i],nums[i]):
+            return False
+    return True
+def make(num,total):
+    three=(total-num)//2
+    two=(total-num)%2
+    one=num-three-two
+    return [1]*one+[2]*two+[3]*three
+def choose(idx,num):
+    if len(C[idx])==0:
+        cards[idx]=make(num,T[idx-1])
+        return
+    base=num//len(C[idx])
+    remain=num%len(C[idx])
+    nums=[base + (1 if i<remain else 0) for i in range(len(C[idx]))]
+    for i in range(len(C[idx])):
+        choose(C[idx][i],nums[i])
+def insert():
+    answer=[]
+    while True:
+        now=1
+        while True:
+            if len(C[now])==0:
+                if len(cards[now])==0:
+                    return answer
+                answer.append(cards[now].pop(0))
+                break
+            cur = now
+            now = C[now][E[now]]
+            E[cur]=0 if E[cur]+1==len(C[cur]) else E[cur]+1
+def solution(edges, target):
+    global C,T,E,cards
+    T=target
+    C=[[] for _ in range(len(edges)+2)]
+    for f,t in edges:
+        C[f].append(t)
+    for c in C:
+        c.sort()
+    E=[0]*(len(edges)+2)
+    cards=[[] for _ in range(len(edges)+2)]
+    for i in range(sum(target)//3,sum(target)+1):
+        if possible(1,i):
+            choose(1,i)
+            return insert()
+    return [-1]
+print(solution([[1,2],[2,3],[2,4],[4,5]],[0,0,3,0,3]))
+#print(solution([[2, 4], [1, 2], [6, 8], [1, 3], [5, 7], [2, 5], [3, 6], [6, 10], [6, 9]],[0, 0, 0, 3, 0, 0, 5, 1, 2, 3]))
+```html
+<html>
+  asdf
+</html>
+```
+
+import sys
+input = sys.stdin.readline
+for _ in range(int(input())):
+    S = input().strip()
+    digit = [k for k in S if k in ["0","1"]][0]
+    N = 0
+    if S[0]=="!" and S[-1]=="!":
+        L,R = S.split(digit)
+        N = len(L)
+    elif S[0]=="!":
+        N = len(S)-1
+    if S[-1]=="!":
+        digit = "1"
+    if N%2 == 0: print(digit)
+    else: print(1 if digit=="0" else 0)
+    
+import sys
+input = sys.stdin.readline
+def calc(N):
+    return int("1"*(N-1))*11
+for _ in range(int(input())):
+    N = int(input())
+    if N==1:
+        print(0)
+    else:
+        print(calc(N))
+import sys
+input = sys.stdin.readline
+def calc(X,Y,x,y):
+    ans = 0
+    visit = [[False]*X for _ in range(Y)]
+    for r in range(Y):
+        for c in range(X):
+            if visit[r][c]: continue
+            ans += 1
+            if 0<=c+x<X and 0<=r+y<Y:
+                visit[r+y][c+x] = True
+    return ans
+for _ in range(int(input())):
+    X,Y,x,y = map(int,input().split())
+    print(calc(X,Y,x,y))
+import sys
+input = sys.stdin.readline
+T = [input().strip() for _ in range(int(input()))]
+chk = [[False]*len(L) for L in T]
+for r in range(len(T)-1):
+    for c in range(len(T[r])):
+        if chk[r][c]: continue
+        if T[r][c] == "R":
+            if "B" in [T[r+1][c],T[r+1][c+1]] or True in [chk[r+1][c],chk[r+1][c+1]]:
+                print(0)
+                exit()
+            chk[r+1][c] = True
+            chk[r+1][c+1] = True
+        else:
+            if c==len(T[r])-1 or "R" in [T[r+1][c+1],T[r][c+1]] or True in [chk[r+1][c+1],chk[r][c+1]]:
+                print(0)
+                exit()
+            chk[r+1][c+1] = True
+            chk[r][c+1] = True
+print(1 if all(chk[-1]) else 0)
+import sys
+input = sys.stdin.readline
+N = int(input())
+M = [input().strip() for _ in range(N)]
+E = {i:[] for i in range(N*N)}
+for r in range(N):
+    for c in range(N):
+        for dr,dc in [(0,1),(1,0),(0,-1),(-1,0)]:
+            if not (0<=r+dr<N and 0<=c+dc<N): continue
+            if M[r+dr][c+dc]=="#":
+                E[r*N+c].append((r+dr)*N+c+dc)
+cycles = []
+visit = set()
+def findCycle(u,p,color=[0]*(N*N),parent=[-1]*(N*N)):
+    if color[u] == 2: return
+    if color[u] == 1:
+        v = []
+        cur = p
+        v.append(cur)
+        while cur != u:
+            cur = parent[cur]
+            v.append(cur)
+        cycles.append(v)
+        return
+    parent[u] = p
+
+    color[u] = 1
+
+    for v in E[u]:
+        if v == parent[u]: continue
+        #if (u,v) in visit or (v,u) in visit: continue
+        visit.add((u,v))
+        findCycle(v,u,color,parent)
+    color[u] = 2
+for i in range(N*N):
+    findCycle(i,-1)
+    print(cycles)
+cycles = [set(c) for c in cycles]
+if len(cycles) == 0:
+    print(0)
+    exit()
+common = cycles.pop()
+for c in cycles:
+    common &= c
+print(len(common))
+LL = [[k//N+1,k%N+1] for k in common]
+print("\n".join([f"{r} {c}" for r,c in LL]))
+s="apple"
+print(s[::-1])
+print(sum(list(map(int,input().split()))))
+print((a:=list(map(int,input().split())))[0]-a[1])
+import math
+for _ in range(int(input())):
+    x1,y1,r1,x2,y2,r2 = map(int,input().split())
+    if(x1==x2 and y1==y2 and r1 ==r2):
+        print(-1)
+        continue
+    dis=math.sqrt((x1-x2)**2+(y1-y2)**2)
+    if(abs(r1+r2-dis)<0.0000000001):
+        print(1)
+    elif(r1+r2<dis):
+        print(0)
+    elif(abs(abs(r1-r2)-dis)<0.000000001):print(1)
+    elif(abs(r1-r2)<dis):
+        print(2)
+    elif(abs(r1-r2)>dis):print(0)
+import sys
+sys.setrecursionlimit(100000)
+input = sys.stdin.readline
+N = int(input())
+M = [input() for _ in range(N)]
+def dfsA(x,y,visit,color):
+    if visit[x][y]: return 0
+    visit[x][y] = True
+    for dx,dy in (0,1),(1,0),(-1,0),(0,-1):
+        nx,ny = x+dx,y+dy
+        if not (0<=nx<N and 0<=ny<N) or visit[nx][ny]:
+            continue
+        if M[nx][ny] in color:
+            dfsA(nx,ny,visit,color)
+    return 1
+visit = [[False]*N for _ in range(N)]
+print(sum(dfsA(i,j,visit,M[i][j]) for i in range(N) for j in range(N)),end=' ')
+visit = [[False]*N for _ in range(N)]
+print(sum(dfsA(i,j,visit,"B" if M[i][j]=="B" else "RG") for i in range(N) for j in range(N)))
+
+dp=[None]*41
+dp[0]=[1,0]
+dp[1]=[0,1]
+def solution(N):
+    if dp[N]==None:
+        dp[N]=[x+y for x,y in zip(solution(N-1),solution(N-2))]
+    return dp[N]
+for _ in range(0,int(input())):
+    A=solution(int(input()))
+    print(A[0],A[1])
+
+import sys
+input = sys.stdin.readline
+N = int(input())
+answers = []
+for _ in range(N):
+    A, W = map(int,input().split())
+    E = [list(map(int,input().split())) for _ in range(2)]
+    if A==1:
+        answers.append(1 if E[0][0]+E[1][0] <= W else 2)
+        continue
+    ans = A*2
+    for i in range(4):
+        # i:0 16,8/ 9,1 사이에 연결 없음
+        # i:1 16,8/ 9,1 사이에 바깥쪽 연결
+        # i:2 16,8/ 9,1 사이에 안쪽 연결
+        # i:3 16,8/ 9,1 사이에 모두 연결
+        dp = [[0,0,0] for _ in range(A)]
+        if i == 0:
+            dp[0][0] = 2 if E[0][0] + E[1][0] > W else 1
+            dp[0][1] = dp[0][2] = 1
+        if i == 1:
+            if E[0][-1] + E[0][0] > W: continue
+            dp[0][0] = 2
+            dp[0][1] = 1
+            dp[0][2] = 2*A
+        if i == 2:
+            if E[1][-1] + E[1][0] > W: continue
+            dp[0][0] = 2
+            dp[0][1] = 2*A
+            dp[0][2] = 1
+        if i == 3:
+            if E[0][-1] + E[0][0] > W or E[1][-1] + E[1][0] > W: continue
+            dp[0][0] = 2
+            dp[0][1] = dp[0][2] = 2*A
+        for k in range(1,A - (1 if i != 0 else 2 if i == 3 else 0)):
+            dp_k0 = []
+            # 전 단계에서 꽉 찼을 때
+            dp_k0.append(dp[k-1][0]+(1 if E[0][k] + E[1][k] <= W else 2))
+            # 전 단계에서 바깥쪽만 찼고, 이번에 안쪽 연결
+            if E[1][k-1] + E[1][k] <= W:
+                dp_k0.append(dp[k-1][1]+2)
+            # 전 단계에서 안쪽만 찼고, 이번에 바깥쪽 연결
+            if E[0][k-1] + E[0][k] <= W:
+                dp_k0.append(dp[k-1][2]+2)
+            # 둘다 연결 가능할 때
+            if E[0][k-1] + E[0][k] <= W and E[1][k-1] + E[1][k] <= W and (k>1 or i==0):
+                dp_k0.append((dp[k-2][0] if k>1 else 0)+2)
+            dp_k1 = []
+            # 전 단계에서 꽉 찼을 때
+            dp_k1.append(dp[k-1][0]+1)
+            # 전 단계에서 안쪽만 찼고, 이번에 바깥쪽 연결
+            if E[0][k-1] + E[0][k] <= W:
+                dp_k1.append(dp[k-1][2]+1)
+            dp_k2 = []
+            # 전 단계에서 꽉 찼을 때
+            dp_k2.append(dp[k-1][0]+1)
+            # 전 단계에서 바깥쪽만 찼고, 이번에 안쪽 연결
+            if E[1][k-1] + E[1][k] <= W:
+                dp_k2.append(dp[k-1][1]+1)
+            dp[k][0] = min(dp_k0)
+            dp[k][1] = min(dp_k1)
+            dp[k][2] = min(dp_k2)
+        if i==1:
+            dp_last_0 = []
+            dp_last_0.append(dp[-2][0]+1)
+            if E[1][-1]+E[1][-2] <= W:
+                dp_last_0.append(dp[-2][1]+1)
+            ans = min(ans,min(dp_last_0))
+        elif i==2:
+            dp_last_0 = []
+            dp_last_0.append(dp[-2][0]+1)
+            if E[0][-1]+E[0][-2] <= W:
+                dp_last_0.append(dp[-2][2]+1)
+            ans = min(ans,min(dp_last_0))
+        elif i==3:
+            ans = min(ans,dp[-2][0])
+        else:
+            ans = min(ans,dp[-1][0])
+    answers.append(ans)
+print(*answers,sep='\n')
+
+            
+            
+
+
+            
+
+from itertools import combinations
+from math import sqrt
+file=open('input.txt')
+T,*lines=file.readlines()
+for _ in range(int(T)):
+    pos=[]
+    N=int(lines.pop(0))
+    for _ in range(N):
+        pos.append(list(map(int,lines.pop(0).split())))
+    combi=list(combinations(list(range(0,len(pos))),len(pos)//2))
+    dis=9999999999999999999999999999999
+    for c in combi[:len(combi)//2+1]:
+        sum_x=0
+        sum_y=0
+        for idx,p in enumerate(pos):
+            minus=-1 if (idx in c)==True else 1
+            sum_x+=minus*p[0]
+            sum_y+=minus*p[1]
+        dis=min(dis,sqrt(sum_x**2+sum_y**2))
+    print(dis)
+    
+word=list(input().upper())
+cnt={x:0 for x in word}
+for w in word:
+    cnt[w]+=1
+cnt_list=[[x,y] for x,y in cnt.items()]
+cnt_list.sort(key=lambda x:x[1],reverse=True)
+if len(cnt_list)>1:print(cnt_list[0][0] if cnt_list[1][1]!=cnt_list[0][1] else "?")
+else:print(cnt_list[0][0])
+import sys
+sys.setrecursionlimit(10**6)
+pos=None
+dxdy=[[-1,0],[1,0],[0,1],[0,-1]]
+def adj(x,y):
+    for dx,dy in dxdy:
+        if 0<=x+dx<len(pos) and 0<=y+dy<len(pos[0]):
+            if pos[x+dx][y+dy]==1:
+                pos[x+dx][y+dy]=2
+                adj(x+dx,y+dy)
+for _ in range(int(input())):
+    M,N,K=map(int,input().split())
+    pos=[[-1]*M for _ in range(N)]
+    for _ in range(K):
+        x,y=map(int,input().split())
+        pos[y][x]=1
+    cnt=0
+    for row in range(N):
+        for col in range(M):
+            if pos[row][col]==1:
+                adj(row,col)
+                cnt+=1
+    print(cnt)
+
+
+import sys
+input = sys.stdin.readline
+for _ in range(int(input())):
+    H,W,N = map(int,input().split())
+    print(str((N-1)%H+1)+str((N-1)//H+1).zfill(2))
+N,M=map(int,input().split())
+K=list(map(int,input().split()))[1:]
+T=[k in K for k in range(1,N+1)]
+P=[list(map(int,input().split()))[1:] for _ in range(M)]
+TT=[False]*len(P)
+NTT=K
+while NTT:
+    NNTT=[]
+    for n in NTT:
+        for i,p in enumerate(P):
+            if n in p and not TT[i]:
+                TT[i]=True
+                NNTT+=p
+    NTT=NNTT
+print(TT.count(False))       
+N,r,c=map(int,input().split())
+br=bin(r)[2:].zfill(N)
+bc=bin(c)[2:].zfill(N)
+print(int(''.join([br[i]+bc[i] for i in range(N)]),2))
+
+S = []
+for _ in range(int(input())):
+    A = int(input())
+    if A == 0:
+        S.pop()
+    else:
+        S.append(A)
+print(sum(S))
+import sys
+input = sys.stdin.readline
+G = int(input())
+P = int(input())
+V = []
+S = 1
+while S < G:
+    S *= 2
+depth = 1
+size = S
+while depth <= S:
+    V.append([size]*depth)
+    size //= 2
+    depth *= 2
+def minus(idx):
+    for i in range(len(V)-1,-1,-1):
+        V[i][idx] -= 1
+        idx //= 2
+for i in range(G,S):
+    minus(i)
+def find(idx):
+    now = idx
+    isLeft = False
+    prev = 0
+    for depth in range(len(V)-1,-1,-1):
+        if not isLeft and  V[depth][now]-prev > 0:
+            break
+        prev = V[depth][now]
+        isLeft = (now % 2 == 0)
+        now //= 2
+    if isLeft and depth==0:
+        return -1
+    if not isLeft and depth!=len(V)-1:
+        now = now*2
+        depth += 1
+    if V[depth][now] == 0:
+        return -1
+    for i in range(depth, len(V)-1):
+        if V[i+1][now*2+1] > 0:
+            now = now*2+1
+        else:
+            now = now*2
+    minus(now)
+    return now
+KK = [int(input()) for _ in range(P)]
+gate = [None]*G
+for i,v in enumerate(KK):
+    k = find(v-1)
+    if k == -1:
+        print(i)
+        break
+    gate[k] = i
+    if i==P-1:
+        print(P)
+
+'''
+20
+20
+15
+14
+13
+12
+11
+10
+9
+15
+15
+15
+15
+15
+15
+6
+1
+16
+17
+15
+15
+15
+'''
+s = input()
+print(*[s.index(chr(x)) if chr(x) in s else -1 for x in range(97,123)],sep=" ")
+import sys
+input = sys.stdin.readline
+print("\n".join([x for x in sorted([input().rstrip() for i in range(int(input()))],key=lambda x:[int(x.split()[0])])]))
+from collections import defaultdict
+input()
+D = defaultdict(int)
+for i in input().split():
+    D[i]+=1
+input()
+print(*[D[x] for x in input().split()])
+input()
+L = list(map(int,input().split()))
+print(min(L),max(L))
+from collections import deque
+import sys
+DQ = deque()
+input = sys.stdin.readline
+ans = []
+for _ in range(int(input())):
+    s = input().rstrip()
+    if s[:4] == "push":
+        DQ.append(s[5:])
+    elif s == "pop":
+        ans.append(DQ.popleft() if DQ else -1)
+    elif s == "size":
+        ans.append(len(DQ))
+    elif s == "empty":
+        ans.append(0 if DQ else 1)
+    elif s == "front":
+        ans.append(DQ[0] if DQ else -1)
+    elif s == "back":
+        ans.append(DQ[-1] if DQ else -1)
+print("\n".join(map(str,ans)))
+import sys
+sys.setrecursionlimit(10**6)
+input = sys.stdin.readline
+N,B = map(int,input().split())
+A = [list(map(int,input().split())) for _ in range(N)]
+dp = {}
+def calc(A,B):
+    R = [[0]*N for _ in range(N)]
+    for i in range(N):
+        for j in range(N):
+            for k in range(N):
+                R[i][j] += A[i][k]*B[k][j]
+            R[i][j] %= 1000
+    return R
+def mult(p):
+    if dp.get(p) != None:
+        return dp[p]
+    if p == 1:
+        return [[i%1000 for i in j] for j in A]
+    H = mult(p//2)
+    dp[p] = calc(H,H)
+    if p%2 == 1:
+        dp[p] = calc(A,dp[p])
+    return dp[p]
+print('\n'.join(' '.join(map(str,i)) for i in mult(B)))
+from collections import deque
+import sys
+DQ = deque()
+input = sys.stdin.readline
+ans = []
+for _ in range(int(input())):
+    s = input().rstrip()
+    if s[:4] == "push":
+        DQ.append(s[5:])
+    elif s == "pop":
+        ans.append(DQ.popleft() if DQ else -1)
+    elif s == "size":
+        ans.append(len(DQ))
+    elif s == "empty":
+        ans.append(0 if DQ else 1)
+    elif s == "front":
+        ans.append(DQ[0] if DQ else -1)
+    elif s == "back":
+        ans.append(DQ[-1] if DQ else -1)
+print("\n".join(map(str,ans)))
+words=[]
+for _ in range(int(input())):
+    words.append(input())
+words.sort(key=lambda x:[len(x),x])
+prev=""
+for w in words:
+    if not prev==w:
+        print(w)
+        prev=w
+from collections import deque
+import sys
+DQ = deque()
+input = sys.stdin.readline
+ans = []
+for _ in range(int(input())):
+    s = input().rstrip()
+    if s[:10] == "push_front":
+        DQ.appendleft(s[11:])
+    elif s[:9] == "push_back":
+        DQ.append(s[10:])
+    elif s == "pop_front":
+        ans.append(DQ.popleft() if DQ else -1)
+    elif s == "pop_back":
+        ans.append(DQ.pop() if DQ else -1)
+    elif s == "size":
+        ans.append(len(DQ))
+    elif s == "empty":
+        ans.append(0 if DQ else 1)
+    elif s == "front":
+        ans.append(DQ[0] if DQ else -1)
+    elif s == "back":
+        ans.append(DQ[-1] if DQ else -1)
+print("\n".join(map(str,ans)))
+y = int(input().split()[1])
+print(*[x for x in list(map(int,input().split())) if x < y],sep=" ")
+import sys
+input = sys.stdin.readline
+sys.setrecursionlimit(100000)
+T = int(input())
+N = list(map(int, input().split()))
+M = [[None]*T for _ in range(T)]
+def solve(f,t):
+    if M[f][t] is not None:
+        return M[f][t]
+    if f==t:
+        M[f][t] = True
+    elif t-f==1:
+        M[f][t] = N[f]==N[t]
+    elif N[f]==N[t]:
+        M[f][t] = solve(f+1,t-1)
+    return M[f][t]
+A = []
+for _ in range(int(input())):
+    a,b = map(int, input().split())
+    A.append(solve(a-1,b-1))
+print('\n'.join(['1' if x else '0' for x in A]))
+import sys
+input = sys.stdin.readline
+print(*[sum(x) for x in [map(int,input().split()) for _ in range(int(input()))]],sep="\n")
+import sys
+L = open(0).readlines()
+print(*[sum(list(map(int,x.split()))) for x in L],sep="\n")
+while (x:=sum(map(int,input().split()))) !=0:print(x)
+import sys
+input = sys.stdin.readline
+C = [0]*10001
+for _ in range(int(input())):
+    C[int(input())]+=1
+for i,c in enumerate(C):
+    for _ in range(c):
+        print(i)
+
+
+x,y = map(int,input().split())
+print(x*y)
+print([int(1024/((1.25**(i-20)))) for i in range(40)])
+import copy
+from importlib.util import find_spec
+from itertools import permutations
+N,M= map(int,input().split())
+card=[]
+colors=[[] for _ in range(M)]
+for _ in range(N):
+    card.append(list(map(int,input().split())))
+bfs=[]
+cnt=999999999999
+for joker in range(0,N):
+    now_cnt=N
+    home=[False]*M
+    zeros=0
+    for i in range(N):
+        if sum(card[i])==0:zeros+=1
+        if i==joker:continue
+        if card[i].count(0)==M-1:
+            if home[[x!=0 for x in card[i]].index(True)]==False:
+                home[[x!=0 for x in card[i]].index(True)]=True
+    cnt=min(cnt,N-home.count(True)-zeros-(0 if sum(card[joker])==0 else 1))
+print(cnt)
+
+
+import sys
+input = sys.stdin.readline
+N,K = map(int,input().split())
+A = [int(input()) for _ in range(N)][::-1]
+ans = 0
+for a in A:
+    ans += K//a
+    K %= a
+print(ans)
+
+import sys
+input = sys.stdin.readline
+M = [list(map(int, input().split())) for _ in range(int(input()))]
+dp = [[None]*len(M) for _ in range(len(M))]
+def calc(i,j):
+    if i==j:
+        return 0
+    if i+1==j:
+        return M[i][0]*M[i][1]*M[j][1]
+    if dp[i][j] is not None:
+        return dp[i][j]
+    dp[i][j] = int(2e31)
+    for k in range(i,j):
+        dp[i][j] = min(dp[i][j],calc(i,k)+calc(k+1,j)+M[i][0]*M[k][1]*M[j][1])
+    return dp[i][j]
+print(calc(0,len(M)-1))
+from itertools import combinations
+x,y = map(int,input().split())
+print(len(list(combinations(range(1,x+1),y))))
+input()
+N=list(map(int,input().split()))
+dp=[1]*len(N)
+for i in range(len(N)-1,-1,-1):
+    for j in range(i,len(N)):
+        if N[i]<N[j]:
+            dp[i]=max(dp[j]+1,dp[i])
+print(max(dp))
+
+input()
+N = list(map(int,input().split()))
+def find(N):
+    dp = [1]*len(N)
+    for i in range(len(N)):
+        for j in range(i):
+            if N[i] > N[j]:
+                dp[i] = max(dp[i],dp[j]+1)
+    return dp
+left = find(N)
+right = find(N[::-1])[::-1]
+print(max(left[i]+right[i]-1 for i in range(len(N))))
+import heapq,sys
+q=[]
+for i in range(int(input())):
+    n=int(sys.stdin.readline())
+    if n==0:
+        print(0 if not q else -heapq.heappop(q))
+    else:
+        heapq.heappush(q,-n)
+
+from heapq import heappush, heappop
+import sys
+input = sys.stdin.readline
+H = []
+for _ in range(int(input())):
+    N = int(input())
+    if N==0:
+        print(heappop(H)[1] if H else 0)
+    else:
+        heappush(H,(abs(N),N))
+
+N=int(input())
+print(sum([v*(N-idx) for idx,v in enumerate(sorted(list(map(int,input().split()))))]))
+import sys
+input = sys.stdin.readline
+N = int(input())
+ADJ = [list(map(int,input().split())) for _ in range(N)]
+for k in range(N):
+    for i in range(N):
+        for j in range(N):
+            if ADJ[i][k] and ADJ[k][j]:
+                ADJ[i][j] = 1
+for i in range(N):
+    print(*ADJ[i])
+import sys
+
+sys.setrecursionlimit(100)
+input = sys.stdin.readline
+N = int(input())
+E = [[None] * (N + 1) for _ in range(N + 1)]
+for _ in range(int(input())):
+    f, t, c = map(int, input().split())
+    E[f][t] = min(E[f][t], c) if E[f][t] != None else c
+for i in range(1, N + 1):
+    for f in range(1, N + 1):
+        for t in range(1, N + 1):
+            if f == t:
+                E[f][t] = 0
+            elif E[f][i] is not None and E[i][t] is not None:
+                E[f][t] = min(E[f][t], E[f][i] + E[i][t]) if E[f][t] != None else E[f][i] + E[i][t]
+
+for i in E[1:]:
+    print(*[k if k != None else 0 for k in i[1:]])
+
+import sys 
+d={1:1,0:0}
+sys.setrecursionlimit(1000000)
+N=int(input())
+def dgn(n):
+    if d.get(n)!=None:return d[n]
+    if n%2==0:
+        K=dgn(n//2)
+        d[n]= (K*(K+2*dgn(n//2-1)))%1000000007
+    else:
+        d[n]=(dgn(n//2+1)**2+dgn(n//2)**2)%1000000007
+    return d[n]
+print(dgn(N)%1000000007)
+
+from sys import setrecursionlimit
+setrecursionlimit(10**5)
+C=[list(map(int,input().split())) for _ in range(int(input()))]
+dp=[[1000*1000]*3 for _ in range(len(C))]
+dp[-1]=C[-1]
+def minC(N,color):
+    if N==len(C)-1:
+        return dp[N][color]
+    if dp[N][color]!= 1000*1000:return dp[N][color]
+    dp[N][color]=C[N][color]+min([minC(N+1,cc) for cc in range(3) if not cc==color])
+    return dp[N][color]
+print(min([minC(0,cc) for cc in range(3)]))
+print(*[str(x)+" "+str(y) for x,y in sorted([list(map(int,input().split())) for _ in range(int(input()))])],sep="\n")
+
+print(*[str(x)+" "+str(y) for x,y in sorted([list(map(int,input().split())) for _ in range(int(input()))],key=lambda x:(x[1],x[0]))],sep="\n")
+print(ord(input()))
+import sys
+input = sys.stdin.readline
+N,M = map(int,input().split())
+L = list(map(int,input().split()))
+A = [0]
+for i in range(N):
+    A.append(A[i]+L[i])
+print(*[A[y]-A[x-1] for x,y in [map(int,input().split()) for _ in range(M)]],sep="\n")
+import sys
+input=sys.stdin.readline
+N,M=map(int,input().split())
+A=[list(map(int,input().split())) for _ in range(N)]
+S=[]
+for i in range(N):
+    S.append([])
+    acc=0
+    for j in range(N):
+        acc+=A[i][j]
+        S[-1].append(acc+(S[i-1][j] if i>0 else 0))
+for _ in range(M):
+    a,b,c,d=map(int,input().split())
+    print(S[c-1][d-1]-(S[a-2][d-1] if a>1 else 0)-(S[c-1][b-2] if b>1 else 0)+(S[a-2][b-2] if a>1 and b>1 else 0))
+file=open('input.txt')
+from sys import setrecursionlimit
+setrecursionlimit(10**6)
+n,*lines=open(0).readlines()
+n=int(n)
+E={i:[] for i in range(1,n+1)}
+for l in lines:
+    k,*v=map(int,l.split())
+    for i in range(0,len(v)-1,2):
+        E[k].append([v[i],v[i+1]])
+dia=1
+def dfs(N,prev):
+    global dia
+    if len(E[N])==1 and E[N][0][0]==prev:
+        return 0
+    Ncost=[dfs(a[0],N)+a[1] for a in E[N] if a[0]!=prev]
+    print(N,Ncost)
+    Ncost.sort(reverse=True)
+    if len(Ncost)>1:dia=max(dia,sum(Ncost[:2]))
+    return(Ncost[0])
+Ncost=[dfs(a[0],1)+a[1] for a in E[1]]
+print(Ncost)
+Ncost.sort(reverse=True)
+if len(Ncost)>1: dia=max(dia,sum(Ncost[:2]))
+dia=max(dia,Ncost[0])
+print(dia)
+
+
+input()
+print(sum(map(int,list(input()))))
+import sys
+S=[False]*21
+for k in range(int(sys.stdin.readline())):
+    M=sys.stdin.readline().split()
+    if M[0]=="all":
+        S=[True]*21
+    elif M[0]=="empty":
+        S=[False]*21
+    elif M[0]=='add':
+        S[int(M[1])]=True
+    elif M[0]=="remove":
+        S[int(M[1])]=False
+    elif M[0]=="check":
+        print(int(S[int(M[1])]))
+    elif M[0]=="toggle":
+        S[int(M[1])]= not S[int(M[1])]
+N,M=map(int,input().split())
+E={i:[] for i in range(1,N+1)}
+for _ in range(M):
+    u,v=map(int,input().split())
+    E[u].append(v)
+    E[v].append(u)
+visit=[False]*(N+1)
+def dfs(node):
+    global visit
+    if visit[node]:return
+    visit[node]=True
+    for n in E[node]:
+        dfs(n)
+answer=0
+for i in range(1,N+1):
+    if not visit[i]:
+        answer+=1
+        dfs(i)
+print(answer)
+import sys
+sys.setrecursionlimit(100001)
+input=sys.stdin.readline
+E={i:[] for i in range(1,int(input())+1)}
+for _ in range(len(E)-1):
+    f,t= map(int,input().split())
+    E[f].append(t)
+    E[t].append(f)
+P=[-1]*len(E)
+def dfs(idx,prev):
+    for c in E[idx]:
+        if c==prev:continue
+        P[c-1]=idx
+        dfs(c,idx)
+dfs(1,-1)
+print(*P[1:],sep="\n")
+N = int(input())
+A = [1,3]
+for i in range(2,N):
+    A.append((A[i-1]+A[i-2]*2)%10007)
+print(A[N-1])
+import sys
+from collections import defaultdict
+from heapq import heappop,heappush
+input = sys.stdin.readline
+N = int(input())
+M = int(input())
+E = defaultdict(list)
+for _ in range(M):
+    a,b,c = map(int,input().split())
+    E[a].append([b,c])
+S,T = map(int,input().split())
+H = [[0,S,[S]]]
+D  = [int(1e11)]*(N+1)
+D[S] = 0
+while H:
+    d,n,r = heappop(H)
+    if D[n] < d: continue
+    if n == T:
+        print(d)
+        print(len(r))
+        print(*r)
+        break
+    for i,j in E[n]:
+        if D[i] > j+d:
+            D[i] = j+d
+            heappush(H,[D[i],i,r+[i]])
+            
+
+
+
+x,y = map(int,input().split())
+L = list(range(1,x+1))
+A = []
+idx = 0
+while len(A)!=x:
+    if idx%y == y-1:
+        A.append(L[idx])
+    else:
+        L.append(L[idx])
+    idx += 1
+print("<"+", ".join(map(str,A))+">")
+
+import heapq
+file=open('input.txt')
+f,*lines=file.readlines()
+v,e=map(int,f.split())
+edges={i:[] for i in range(1,v+1)}
+for l in lines:
+    s,f,c=map(int,l.split())
+    edges[s].append([f,c])
+    edges[f].append([s,c])
+adj=[]
+visit=[False]*(v+1)
+visit[1]=True
+for v,c in edges[1]:
+    heapq.heappush(adj,[c,v])
+total=0
+while adj:
+    c,v=heapq.heappop(adj)
+    if visit[v]:continue
+    visit[v]=True
+    total+=c
+    if all(visit[1:]):
+        break
+    for v,c in edges[v]:
+        heapq.heappush(adj,[c,v])
+print(total)
+N = int(input())
+A = list(map(int, input().split()))
+def find(D, target):
+    # find the largest index i such that D[i] < target
+    l, r = 0, len(D)-1
+    while l<r:
+        mid = (l+r)//2
+        if D[mid] < target:
+            l = mid+1
+        else:
+            r = mid
+    if D[r] < target:
+        return r
+    else:
+        return l
+D = [A[0]]
+M = 1
+for a in A[1:]:
+    if a > D[-1]:
+        D.append(a)
+    elif a in [D[0], D[-1]]:
+        continue
+    else:
+        M = max(M, len(D))
+        idx = find(D, a)
+        if idx==-1:
+            D[0] = a
+        else:
+            D[idx] = a
+print(len(D))
+file=open('input.txt')
+N,*lines=file.readlines()
+import heapq
+jewel=[list(map(int,x.split())) for x in lines[:int(N.split()[0])]]
+bag=[int(x.strip()) for x in lines[int(N.split()[0]):]]
+bag.sort()
+jewel.sort(key=lambda x:x[0])
+q=[]
+value=0
+idx=0
+for b in bag:
+    while idx<len(jewel) and jewel[idx][0]<=b:
+        heapq.heappush(q,-jewel[idx][1])
+        idx+=1
+    if q:value-=heapq.heappop(q)
+print(value)
+import sys
+input = sys.stdin.readline
+sys.setrecursionlimit(10**6)
+N,M,K = map(int,input().split())
+A = [list(map(int,input().split())) for _ in range(N)]
+G = [[0]*M for _ in range(N)]
+def dfs(r,c,g):
+    G[r][c]=g
+    for dr,dc in [[-1,0],[0,-1],[0,1],[1,0]]:
+        if not (0<=r+dr<N and 0<=c+dc<M):continue
+        if G[r+dr][c+dc]!=0:continue
+        if abs(A[r+dr][c+dc]-A[r][c])>K:continue
+        dfs(r+dr,c+dc,g)
+ans = 0
+for r in range(N):
+    for c in range(M):
+        if G[r][c]==0:
+            ans+=1
+            dfs(r,c,r*M+c+1)
+print(ans)
+
+import sys
+input = sys.stdin.readline
+N,M = map(int,input().split())
+A = {} # True if it's marked
+XY = [list(map(int,input().split())) for _ in range(N)]
+P = list(map(int,input().split()))
+R = list(map(int,input().split()))
+isMarked = [False]*N
+squareDis = lambda x,y: (x[0]-y[0])**2+(x[1]-y[1])**2
+for p in range(M):
+    isMarked[P[p]-1] = True
+    for idx in range(N):
+        if squareDis(XY[idx],XY[P[p]-1])<=R[p+1]**2:
+            isMarked[idx] = True
+now = set([i for i in range(N) if not isMarked[i]])
+dirty = set([i for i in range(N) if isMarked[i]])
+ans = 0
+while True:
+    nextNow = set()
+    for idx in now:
+        ans +=1
+        clean = set()
+        for p in dirty:
+            if squareDis(XY[idx],XY[p])<=R[0]**2:
+                nextNow.add(p)
+                clean.add(p)
+        for c in clean:
+            dirty.remove(c)
+    if len(nextNow)==0:
+        break
+    now = nextNow
+print(ans)
+    
+N,S=map(int,input().split())
+num=list(map(int,input().split()))
+sum_B=[]
+cnt=0
+def BSubSum(idx,sum):
+    if idx==len(num)-1:
+        sum_B.append(sum)
+        sum_B.append(sum+num[idx])
+    else:
+        BSubSum(idx+1,sum)
+        BSubSum(idx+1,sum+num[idx])
+def ASubSum(idx,sum):
+    global cnt
+    if idx==len(num)//2:
+        cnt+=(bisect_right(S-sum)-bisect_left(S-sum))  
+    else:
+        ASubSum(idx+1,sum)
+        ASubSum(idx+1,sum+num[idx])
+def bisect_left(t):
+    l=0
+    r=len(sum_B)
+    while r-l>0:
+        mid=(l+r)//2
+        if sum_B[mid]<t:
+            l=mid+1
+        else:
+            r=mid
+    return l
+def bisect_right(t):
+    l=0
+    r=len(sum_B)
+    while r-l>0:
+        mid=(l+r)//2
+        if sum_B[mid]<=t:
+            l=mid+1
+        else:
+            r=mid
+    return l
+BSubSum(len(num)//2,0)
+sum_B.sort()
+ASubSum(0,0)
+print(cnt-(1 if S==0 else 0))
+
+from random import randint
+import bisect
+
+B=[randint(-100,100) for _ in range(5)]*2
+B.sort()
+print(B)
+def bisect_left(t):
+    l=0
+    r=len(B)
+    while r-l>0:
+        mid=(l+r)//2
+        if B[mid]<t:
+            l=mid+1
+        else:
+            r=mid
+    return l
+def bisect_right(t):
+    l=0
+    r=len(B)
+    while r-l>1:
+        mid=(l+r)//2
+        if B[mid]<t:
+            l=mid+1
+        else:
+            r=mid
+    return r
+def S(t):
+    print(bisect_left(t),bisect_right(t))
+N=int(input())
+M=[list(map(int,input().split())) for _ in range(N)]
+answer=2
+def move(direction,org):
+    global N,answer
+    dir = -1 if -1 in direction else 1
+    if direction[1]==0:
+        lines=[list(line) for line in org]
+    else:
+        lines=[[org[i][k] for i in range(N)] for k in range(N)]
+    for nth in range(N):
+        for fr in range(1 if dir>0 else N-1,N if dir>0 else -1,dir):
+            my=lines[fr][nth]
+            lines[fr][nth]=0
+            if my==0:continue
+            prev=fr
+            for to in range(fr-dir,-1 if dir>0 else N,-dir):
+                if lines[to][nth]==0:
+                    prev=to
+                elif lines[to][nth]==my and lines[to][nth]>0 and my>0:
+                    prev=to
+                    my=-2*my
+                    lines[to][nth]=0
+                else:
+                    break
+            lines[prev][nth]=my
+    if direction[1]==0:
+        M=[[abs(lines[i][j]) for j in range(N)] for i in range(N)]
+    else:
+        M=[[abs(lines[j][i]) for j in range(N)] for i in range(N)]
+    answer=max(max([max(line) for line in M]),answer)
+    return M
+pool=[M]
+
+for _ in range(5):
+    new_pool=[]
+    for now in pool:
+        for k in [[-1,0],[1,0],[0,1],[0,-1]]:
+            new_pool.append(move(k,now))
+    pool=new_pool
+print(answer)
+
+from collections import deque
+def rotate():
+    global L,R,B,T
+    if len(L)==0:
+        T.appendleft(B.popleft())
+        B.append(T.pop())
+        return
+    T.appendleft(L.popleft())
+    R.appendleft(T.pop())
+    B.append(R.pop())
+    L.append(B.popleft())
+def shift():
+    global L,R,M,B,T
+    if len(M)==0:
+        T,B=B,T
+        return
+    L.appendleft(T.popleft())
+    R.appendleft(T.pop())
+    M.append(T)
+    T=B
+    B=M.popleft()
+    B.appendleft(L.pop())
+    B.append(R.pop())
+L,R,T,B,M=[deque() for _ in range(5)]
+def solution(rc, operations):
+    global L,R,B,T,M
+    L,R,T,B,M=[deque() for _ in range(5)]
+    for i in range(len(rc[0])):
+        T.append(rc[0][i])
+        B.append(rc[-1][i])
+    for i in range(1,len(rc)-1):
+        L.append(rc[i][0])
+        R.append(rc[i][-1])
+    for i in range(len(rc)-2,0,-1):
+        dq=deque()
+        for j in range(1,len(rc[0])-1):
+            dq.append(rc[i][j])
+        M.append(dq)
+    for o in operations:
+        if o[0]=="S":
+            shift()
+        else:rotate()
+    RC=[]
+    RC.append([T.popleft() for _ in range(len(rc[0]))])
+    for i in range(len(rc)-2):
+        RC.append([L.popleft()]+[M[-(i+1)].popleft() for _ in range(len(rc[0])-2)]+[R.popleft()])
+    RC.append([B.popleft() for _ in range(len(rc[0]))])
+    return RC
+print(solution([[1, 2, 3], [4, 5, 6], [7, 8, 9]],	["Rotate", "ShiftRow"]))
+print(solution([[8, 6, 3], [3, 3, 7], [8, 4, 9]],	["Rotate", "ShiftRow", "ShiftRow"]))
+print(solution([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]],["ShiftRow", "Rotate", "ShiftRow", "Rotate"]))
+print(solution([[1,2],[3,4]],["ShiftRow", "Rotate", "ShiftRow", "Rotate"]))
+while True:
+    word=input()
+    if word=="0":break
+    if word==word[::-1]:
+        print('yes')
+    else:
+        print('no')
+import sys
+sys.setrecursionlimit(10**6)
+N,M,V=map(int,input().split())
+E={}
+for _ in range(M):
+    f,t=map(int,input().split())
+    if not E.get(f):
+        E[f]=[t]
+    else:
+        E[f].append(t)
+    if not E.get(t):
+        E[t]=[f]
+    else:
+        E[t].append(f)
+for e in E.values():
+    e.sort()
+dfs_=[]
+visit=[False]*(N+1)
+def dfs(now):
+    global visit
+    global dfs_
+    if visit[now]:return
+    dfs_.append(now)
+    visit[now]=True
+    if not E.get(now):return
+    for i in E[now]:
+        dfs(i)
+dfs(V)
+print(*dfs_)
+now=[V]
+visit=[False]*(N+1)
+bfs=[]
+while now:
+    next_=[]
+    for b in now:
+        if visit[b]:continue
+        bfs.append(b)
+        visit[b]=True
+        if not E.get(b):continue
+        for e in E[b]:
+            if visit[e]:continue
+            next_.append(e)
+    now=next_
+print(*bfs)
+
+        
+from copy import deepcopy
+G = [[1,2],[0,2,3],[0,1,3,4],[1,2,4,7],[2,3,5,7],[4,6],[5,7],[3,4,6]]
+N = [[0]*8 for _ in range(8)]
+def calcNext(N):
+    nextN = [[0]*8 for _ in range(8)]
+    for i in range(8):
+        for x in range(8):
+            for y in range(8):
+                nextN[x][y] += N[x][i]*N[i][y]%1000000007
+    return nextN
+for i in range(8):
+    for j in G[i]:
+        N[i][j] = 1
+I = int(input())
+T = I
+bins = {}
+while T != 0:
+    lowest = T&-T
+    bins[lowest] = None
+    T -= lowest
+maxBins = max(bins.keys())
+bins[1] = deepcopy(N)
+i = 2
+while i <= maxBins:
+    N = calcNext(N)
+    if i in bins:
+        bins[i] = deepcopy(N)
+    i <<= 1
+if not 1&I: del bins[1]
+ans = bins[maxBins]
+del bins[maxBins]
+for k,v in bins.items():
+    nextAns = [[0]*8 for _ in range(8)]
+    if not v: continue
+    for i in range(8):
+        for x in range(8):
+            for y in range(8):
+                nextAns[x][y] += ans[x][i]*v[i][y]%1000000007
+    ans = nextAns
+print(ans[0][0]%1000000007)
+
+
+    
+
+N,K = map(int,input().split())
+visit = [1000000]*100001
+q = [(N,0)]
+ans = 0
+while q and ans == 0:
+    nq = []
+    for x,cnt in q:
+        if x == K:
+            if ans == 0:
+                print(cnt)
+            ans+=1
+        if 0<=x-1<=100000 and visit[x-1] >= cnt:
+            nq.append((x-1,cnt+1))
+            visit[x-1] = cnt
+        if 0<=x+1<=100000 and visit[x+1] >= cnt:
+            nq.append((x+1,cnt+1))
+            visit[x+1] = cnt
+        if 0<=x*2<=100000 and visit[x*2] >= cnt:
+            nq.append((x*2,cnt+1))
+            visit[x*2] = cnt
+    q = nq
+print(ans)
+import sys
+input=sys.stdin.readline
+N,K=map(int,input().split())
+I=[list(map(int,input().split())) for _ in range(N)]
+dp=[[-1]*(K+1) for _ in range(N)]
+def getDp(idx,r):
+    global dp
+    if dp[idx][r]!=-1:return dp[idx][r]
+    if idx==(N-1):
+        if r>=I[idx][0]:return I[idx][1]
+        else: return 0
+    if r>=I[idx][0]:dp[idx][r]=max(getDp(idx+1,r-I[idx][0])+I[idx][1],getDp(idx+1,r))
+    else:dp[idx][r]=getDp(idx+1,r)
+    return dp[idx][r]
+print(getDp(0,K)) 
+
+import sys
+import math
+input = sys.stdin.readline
+D = [list(map(int,input().split())) for _ in range(int(input()))]
+def pow(x,y):
+    if y == 0:
+        return 1
+    if y%2:
+        return (pow(x,y-1)*x)%MOD
+    a = pow(x,y//2)
+    return (a*a)%MOD
+MOD = 1000000007
+ans = 0
+for x,y in D:
+    gcd = math.gcd(x,y)
+    x //= gcd
+    y //= gcd
+    ans += y*pow(x,MOD-2)%MOD
+    ans %= MOD
+print(ans) 
+
+
+
+from itertools import combinations
+cards=[]
+cnt=[0]*12
+idx={'top':0,'one':1,'two':2,'tripple':3,'straight':4,'backstraight':5,'mountain':6,'flush':7,'fullhouse':8,'four':9,'stifle':10,'royal':11}
+for i in range(4):
+    for j in range(13):
+        cards.append([j,i])
+rtf=[0]*4
+hands=list(combinations(cards,6))
+for c in hands:
+    rank=-1
+    pick=list(combinations(c,5))
+    
+    for p in pick:
+        flush=False
+        straight=False
+        nums=[k[0] for k in p]
+        symbol=[x[1] for x in p]
+        if all([x==symbol[0] for x in symbol]):flush=True
+        nums.sort()
+        if all(nums[x]==nums[x-1]+1 for x in range(1,len(nums))):straight=True
+        if flush and [0,1,2,3,4]==nums:
+            rank=idx['royal']
+            rtf[symbol[0]]+=1
+        if rank>=idx['royal']:continue
+        if straight and flush:rank=idx['stifle']
+        if rank>=idx['stifle']:continue
+        number=[nums.count(x) for x in set(nums)]
+        if 4 in number:rank=idx['four']
+        if rank>=idx['four']:continue
+        if 3 in number and 2 in number:rank=idx['fullhouse']
+        if rank>=idx['fullhouse']:continue
+        if flush:rank=idx['flush']
+        if rank>=idx['flush']:continue
+        if [0,9,10,11,12]==nums:rank=idx['mountain']
+        if rank>=idx['mountain']:continue
+        if [0,1,2,3,4]==nums:rank=idx['backstraight']
+        if rank>=idx['backstraight']:continue
+        if straight:rank=idx['straight']
+        if rank>=idx['straight']:continue
+        if 3 in number:rank=idx['tripple']
+        if rank>=idx['tripple']:continue
+        if number.count(2)==2: rank=idx['two']
+        if rank>=idx['two']:continue
+        if 2 in number: rank=idx['one']
+        if rank>=idx['one']:continue
+        if rank==-1:rank=idx['top']      
+    cnt[rank]+=1
+print(cnt)
+print(rtf)
+print(sum(cnt),len(hands))
+
+for c in cnt:
+    a=c
+    b=20358520
+    fin=False
+    while not fin:
+        for i in range(2,a+1):
+            if a%i==0 and b%i==0:
+                a=a//i
+                b=b//i
+                break
+            if i==a:
+                fin=True
+            if a==1:break
+
+        if a==1: fin=True
+    print(str(a)+'/'+str(b))
+print("1005/3094")
+print("486537/1017926")
+print("24354/195755")
+print("1408/39151")
+print("14103/1017926")
+print("9/4606")
+print("9/4606")
+print("25747/2544815")
+print("228/27965")
+print("3/4165")
+print("184/2544815")
+print("1/108290")
+N=int(input())
+A=list(map(int,input().split()))
+B,C=map(int,input().split())
+ceil = lambda x : int(x//1 if x%1==0 else x//1+1)
+print(sum([1+ceil(max(0,x-B)/C) for x in A]))
+N,M=map(int,input().split())
+B=[list(input()) for _ in range(N)]
+bx=by=0
+rx=ry=0
+for x in range(N):
+    for y in range(M):
+        if B[x][y]=="B":
+            bx=x
+            by=y
+            B[x][y]="."
+        elif B[x][y]=="R":
+            rx=x
+            ry=y
+            B[x][y]="."
+pool=[[bx,by,rx,ry]]
+
+
+def moveBlue(dx,dy,rx,ry,bx,by):
+    while True:
+        if B[bx+dx][by+dy]=="#" or (bx+dx==rx and by+dy==ry):return [bx,by]
+        elif B[bx+dx][by+dy]=="O":
+            return [-1,-1]
+        if B[bx+dx][by+dy]==".":
+            bx+=dx
+            by+=dy
+def moveRed(dx,dy,rx,ry,bx,by):
+    while True:
+        if B[rx+dx][ry+dy]=="#" or  (rx+dx==bx and ry+dy==by):return [rx,ry]
+        elif B[rx+dx][ry+dy]=="O":
+            return [-1,-1]
+        elif B[rx+dx][ry+dy]==".":
+            rx+=dx
+            ry+=dy
+def solve():
+    global pool
+    for answer in range(10):
+        new_pool=[]
+        for bx,by,rx,ry in pool:
+            for dx,dy in [[-1,0],[1,0],[0,1],[0,-1]]:
+                if (dx>0 and bx>rx) or (dx<0 and bx<rx) or (dy>0 and by>ry) or (dy<0 and by<ry):
+                    nbx,nby=moveBlue(dx,dy,rx,ry,bx,by)
+                    if nbx==-1 and nby==-1:continue
+                    nrx,nry=moveRed(dx,dy,rx,ry,nbx,nby)
+                    if nrx==-1 and nry==-1:return answer
+                    new_pool.append([nbx,nby,nrx,nry])
+                else:
+                    nrx,nry=moveRed(dx,dy,rx,ry,bx,by)
+                    nbx,nby=moveBlue(dx,dy,nrx,nry,bx,by)
+                    if nrx==-1 and nry==-1 and nbx!=-1 and nby!=-1:
+                        return answer
+                    new_pool.append([nbx,nby,nrx,nry])
+        pool=new_pool
+    return -2
+                
+print(solve()+1)
+from queue import heappop,heappush
+N,K=map(int,input().split())
+dp=[-1]*100001
+V=[False]*100001
+C=[(0,N)]
+while C:
+    cost,now=heappop(C)
+    if K==now:
+        print(cost)
+        exit()
+    if K<now:
+        heappush(C,(cost+now-K,K))
+        continue
+    if V[now]:continue
+    V[now]=True
+    heappush(C,(cost+1,now+1))
+    if now>0:heappush(C,(cost+1,now-1))
+    heappush(C,(cost,now*2))
+
+N,M=map(int,input().split())
+D = [[N]*N for _ in range(N)]
+for _ in range(M):
+    f,t=map(int,input().split())
+    D[f-1][t-1] = 1
+    D[t-1][f-1] = 1    
+for i in range(N):
+    D[i][i] = 0
+# floyd-warshall
+for k in range(N):
+    for i in range(N):
+        for j in range(N):
+            D[i][j] = min(D[i][j], D[i][k]+D[k][j])
+print(min([[sum(x),i] for i,x in enumerate(D)])[1]+1)
+
+import sys
+input = sys.stdin.readline
+
+_ = input()
+nums = list(map(int, input().split()))
+
+# Binary_search method
+
+def binary_search(lis_arr, num): #
+
+    low = -1 # 접근 X
+    high = len(lis_arr) # 접근 X
+
+    # 결정 문제
+    # [1 3 5] 에서 2가 들어오면 [2 3 5]가 되어야 함
+
+    # num은 mid보다 큰가? -> TF문제에서 가장 작은 F (high)
+    # 왜 초과인가? -> 같은 숫자가 들어올 수 있기 때문
+    
+    while low +1 < high:
+        #print(lis_arr)
+        mid = (low + high)//2 
+
+        if num > lis_arr[mid]: # TTF므로 왼쪽 탐색 X
+            low = mid
+        else:
+            high = mid
+
+    return high
+
+lis_arr = [-1000000001]
+lis_total = [(-1000000001,0)] # number, index
+
+nums = nums[::-1] # stack처럼 쓰기 위해
+
+while nums:
+    num = nums.pop()
+
+    if num > lis_arr[-1]:
+        lis_total.append((num, len(lis_arr)))
+        lis_arr.append(num)
+
+    else:
+        idx = binary_search(lis_arr, num)
+        lis_arr[idx] = num
+        lis_total.append((num, idx))
+
+lis_length = len(lis_arr)-1
+lis = []
+
+#print(lis_total)
+
+while lis_total and lis_length:
+    num, idx = lis_total.pop()
+    if idx == lis_length:
+        lis.append(num)
+        lis_length -= 1
+
+print(len(lis))
+print(*lis[::-1])
+
+N = int(input())
+A = list(map(int, input().split()))
+def find(D, target):
+    # find the largest index i such that D[i] < target
+    l, r = 0, len(D)-1
+    while l<r:
+        mid = (l+r)//2
+        if D[mid] < target:
+            l = mid+1
+        else:
+            r = mid
+    if D[r] < target:
+        return r
+    else:
+        return l
+D = [A[0]]
+M = [(A[0], 1)]
+for a in A[1:]:
+    if a > D[-1]:
+        D.append(a)
+        M.append((a, len(D)))
+    elif a in [D[0], D[-1]]:
+        continue
+    else:
+        idx = find(D, a)
+        if idx==-1:
+            D[0] = a
+        else:
+            D[idx] = a
+        M.append((a, idx+1))
+ans = len(D)
+P = []
+print(ans)
+while ans and M:
+    num, idx = M.pop()
+    if idx == ans:
+        P.append(num)
+        ans -= 1
+print(*P[::-1])
+import copy
+n,E,W,S,N = map(int,input().split())
+E,W,S,N=[x/100 for x in [E,W,S,N]]
+bfs=[[0,0,1]]
+odd=1.00
+count=0
+visit=[[False]*(2*n+1) for _ in range(2*n+1)]
+visit[n][n]=True
+while bfs and count<n:
+    next_bfs=[]
+    new_visit=copy.deepcopy(visit)
+    count=count+1
+    for b in bfs:
+        east,north,now_odd =b
+        if visit[east+1+n][north+n]:
+            odd=odd-now_odd*E
+        else:
+            next_bfs.append([east+1,north,now_odd*E])
+            new_visit[east+1+n][north+n]=True
+        if visit[east-1+n][north+n]:
+            odd=odd-now_odd*W
+        else:
+            next_bfs.append([east-1,north,now_odd*W])
+            new_visit[east-1+n][north+n]=True
+        if visit[east+n][north-1+n]:
+            odd=odd-now_odd*S
+        else:
+            next_bfs.append([east,north-1,now_odd*S])
+            new_visit[east+n][north-1+n]=True
+        if visit[east+n][north+1+n]:
+            odd=odd-now_odd*N
+        else:
+            next_bfs.append([east,north+1,now_odd*N])
+            new_visit[east+n][north+1+n]=True
+    bfs=next_bfs
+    visit=new_visit
+    print(str(count)+":"+str(odd))
+    print(str(count)+":"+str(bfs))
+print(odd)
+
+idx=int(input())
+cnt=0
+num=666
+while True:
+    if '666' in str(num):
+        cnt+=1
+    if cnt==idx:
+        print(num)
+        break
+    num+=1
+N,M,x,y,K = map(int,input().split())
+A=[list(map(int,input().split())) for _ in range(N)]
+D=[0,0,[0,0,0,0]] # L,R,[F,U,B,D]
+drdc = [[0,1],[0,-1],[-1,0],[1,0]]
+for i in list(map(int,input().split())):
+    dr,dc = drdc[i-1]
+    if not (0<=x+dr<N and 0<=y+dc<M):continue
+    x,y=x+dr,y+dc
+    if i==3:
+        print(D[2][3])
+        D[2]=[D[2][3]]+D[2][:3]
+    elif i==4:
+        print(D[2][1])
+        D[2]=D[2][1:]+[D[2][0]]
+    elif i==1:
+        print(D[0])
+        D=[D[2][2],D[2][0],[D[0],D[2][1],D[1],D[2][3]]]
+    elif i==2:
+        print(D[1])
+        D=[D[2][0],D[2][2],[D[1],D[2][1],D[0],D[2][3]]]
+    if A[x][y]==0:
+        A[x][y]=D[2][2]
+    else:
+        D[2][2]=A[x][y]
+        A[x][y]=0
+
+
+R,C=map(int,input().split())
+B=[list(map(int,input().split())) for _ in range(R)]
+def getMask(r,c):
+    M=[]
+    M.append([(x,c) for x in range(r,r+4)])
+    M.append([(r,x) for x in range(c,c+4)])
+    M.append([(x,y) for x in range(r,r+2) for y in range(c,c+2)])
+    M.append([(x,c) for x in range(r,r+3)]+[(r,c-1)])
+    M.append([(x,c) for x in range(r,r+3)]+[(r,c+1)])
+    M.append([(x,c) for x in range(r-2,r+1)]+[(r,c-1)])
+    M.append([(x,c) for x in range(r-2,r+1)]+[(r,c+1)])
+    M.append([(r,x) for x in range(c,c+3)]+[(r+1,c)])
+    M.append([(r,x) for x in range(c,c+3)]+[(r-1,c)])
+    M.append([(r,x) for x in range(c-2,c+1)]+[(r+1,c)])
+    M.append([(r,x) for x in range(c-2,c+1)]+[(r-1,c)])
+    M.append([(r,c),(r+1,c),(r+1,c+1),(r+2,c+1)])
+    M.append([(r,c),(r+1,c),(r+1,c-1),(r+2,c-1)])
+    M.append([(r,c),(r,c+1),(r+1,c+1),(r+1,c+2)])
+    M.append([(r,c),(r,c+1),(r-1,c+1),(r-1,c+2)])
+    M.append([(r,x) for x in range(c-1,c+2)]+[(r+1,c)])
+    M.append([(r,x) for x in range(c-1,c+2)]+[(r-1,c)])
+    M.append([(x,c) for x in range(r-1,r+2)]+[(r,c+1)])
+    M.append([(x,c) for x in range(r-1,r+2)]+[(r,c-1)])
+    return M
+def rotate():
+    global B
+    B=[[B[len(B)-c+-1][r] for c in range(len(B))] for r in range(len(B[0]))]
+def mirrorH():
+    global B
+    B=[[B[len(B)-r-1][c] for c in range(len(B[0]))] for r in range(len(B))]
+def mirrorV():
+    global B
+    B=[[B[r][len(B[0])-c-1] for c in range(len(B[0]))] for r in range(len(B))]
+def match(mask):
+    return sum([B[x][y] for x,y in mask])
+ans=0
+for r in range(len(B)):
+    for c in range(len(B[0])):
+        for i,mask in enumerate(getMask(r,c)):
+            if all([0<=x<len(B) and 0<=y<len(B[0]) for x,y in mask]):
+                if ans<(K:=match(mask)):
+                    ans=K
+print(ans)
+
+import sys
+N=int(input())
+K=[list(map(int,sys.stdin.readline().split())) for _ in range(N)]
+dp=[-1]*(N-1)+[K[-1][1] if K[-1][0]==1 else 0]
+for i in range(len(K)-2,-1,-1):
+    dp[i]=max((K[i][1] if K[i][0]+i<=N else 0)+(dp[i+K[i][0]] if i+K[i][0]<len(K) else 0),dp[i+1])
+print(dp[0])
+N,M=map(int,input().split())
+r,c,d=map(int,input().split())
+gap=[[0,-1],[-1,0],[0,1],[1,0]]
+visit=[]
+for _ in range(N):
+    visit.append(list(map(int,input().split())))
+finish=False
+cnt=0
+while not finish:
+    if visit[r][c]==0:
+        cnt+=1
+        visit[r][c]=3
+    for i in range(4):
+        lr=r+gap[d][0]
+        lc=c+gap[d][1]
+        d=(d-1) if d>0 else 3
+        if visit[lr][lc]==0:
+            r,c=lr,lc
+            break
+        if i==3:
+            if d==0:
+                br=r+1
+                bc=c
+            if d==1:
+                br=r
+                bc=c-1
+            if d==2:
+                br=r-1
+                bc=c
+            if d==3:
+                br=r
+                bc=c+1
+            if visit[br][bc]==1:
+                finish=True
+            else: 
+                r=br
+                c=bc
+print(cnt)
+N,M=map(int,input().split())
+book=list(map(int,input().split()))
+minus=sorted([x for x in book if x<0])
+plus=sorted([x for x in book if x>0],reverse=True)
+def left():
+    if not minus: return 999999999999999
+    mminus=list(minus)
+    pplus=list(plus)
+    walk=0
+    walk+=abs(mminus[0])
+    mminus=mminus[M:]
+    return work(mminus,pplus,walk)
+def right():
+    if not plus: return 999999999999999
+    mminus=list(minus)
+    pplus=list(plus)
+    walk=0
+    walk+=abs(pplus[0])
+    pplus=pplus[M:]
+    return work(mminus,pplus,walk)
+def work(minus,plus,walk):
+    while len(minus)>0:
+        walk+=2*abs(minus[0])
+        minus=minus[min(len(minus),M):]
+    while len(plus)>0:
+        walk+=2*abs(plus[0])
+        plus=plus[min(len(plus),M):]
+    return walk
+print(min(left(),right()))
+a=int(input())
+dp=[10**7]*(a+1)
+dp[1]=0
+for i in range(2,a+1):
+    if i%3==0:
+        dp[i]=min(dp[i//3]+1,dp[i])
+    if i%2==0:
+        dp[i]=min(dp[i//2]+1,dp[i])
+    dp[i]=min(dp[i-1]+1,dp[i])
+print(dp[a])
+import sys
+from heapq import heappop,heappush
+N,M,R = map(int,sys.stdin.readline().split())
+D = list(map(int,sys.stdin.readline().split()))
+E = {i:[] for i in range(N)}
+for _ in range(R):
+    a,b,c = map(int,sys.stdin.readline().split())
+    E[a-1].append((b-1,c))
+    E[b-1].append((a-1,c))
+def dijkstra(start):
+    dist = [float('inf')]*(N+1)
+    dist[start] = 0
+    q = [(0,start)]
+    while q:
+        c,x = heappop(q)
+        if dist[x] < c:
+            continue
+        for nx,nc in E[x]:
+            if dist[nx] > c+nc:
+                dist[nx] = c+nc
+                heappush(q,(c+nc,nx))
+    return dist
+S = [dijkstra(d) for d in range(N)]
+print(max(sum([D[i] for i in range(N) if S[d][i] <= M]) for d in range(N)))
+
+import heapq
+file=open('input.txt').readlines()
+N,E=map(int,file[0].split())
+edge={i:[] for i in range(1,N+1)}
+for l in file[1:-1]:
+    f,t,c=map(int,l.split())
+    edge[f].append([t,c])
+    edge[t].append([f,c])
+v1,v2=map(int,file[-1].split())
+def calcDis(fr,to):
+    cost=[999999999999999]*(N+1)
+    visit=[False]*(N+1)
+    cost[fr]=0
+    hq=[[0,fr]]
+    while hq:
+        toFC,f=heapq.heappop(hq)
+        if visit[f]:continue
+        if f==to:
+            return (toFC)
+        visit[f]=True
+        for t,c in edge[f]:
+            if not visit[t]:heapq.heappush(hq,[toFC+c,t])
+v1First= -1 if None in (K:=[calcDis(1,v1),calcDis(v1,v2),calcDis(v2,N)]) else sum(K)
+v2First= -1 if None in (K:=[calcDis(1,v2),calcDis(v2,v1),calcDis(v1,N)]) else sum(K)
+if v1First==-1 and v2First==-1: print(-1)
+else:print(min([v1First,v2First]))
+from sys import setrecursionlimit
+setrecursionlimit(10**7)
+w=input()
+dp=[None]*len(w)
+palin_to=[[i] for i in range(len(w))]
+def palin(idx,acc):
+    if idx==len(w):return
+    for i in range(len(acc)):
+        if idx+i>len(w)-1:break
+        if acc[-(i+1)]!=w[idx+i]:
+            break
+        palin_to[idx-i-1].append(idx+i)
+    for i in range(len(acc)):
+        if idx+i+1>len(w)-1:break
+        if acc[-(i+1)]!=w[idx+i+1]:
+            break
+        palin_to[idx-i-1].append(idx+i+1)
+    palin(idx+1,acc+w[idx])
+palin(0,'')
+def minS(idx):
+    if idx==len(w):
+        return 0
+    if dp[idx]==None:
+        dp[idx]=min([1+minS(i+1) for i in palin_to[idx]])
+    return dp[idx]
+minS(0)
+print(dp[0])
+b=input().split('-')
+r=sum(list(map(int,b[b[0]==''].split('+'))))*(-1 if b[0]=='' else 1)
+r+=sum([sum(list(map(int,x.split('+'))))*-1 for x in b[(1+(b[0]=='')):]])
+print(r)
+input()
+score=list(map(int,input().split()))
+print(sum(score)/max(score)/len(score)*100)
+N=int(input())
+dp=[[[0]*1024 for _ in range(10)] for _ in range(N)]
+for i in range(0,N):
+    for j in range(10):
+        if i==0:
+            dp[i][j][2**j]=1
+            continue
+        for t in [-1,1]:
+            if 9>=j+t>=0:
+                for k in range(1024):
+                    mask=k|(2**j)
+                    dp[i][j][mask]+=dp[i-1][j+t][k]
+print(sum([dp[N-1][k][1023] for k in range(1,10)])%1000000000)
+                    
+import itertools
+N,M=map(int,input().split())
+for k in itertools.permutations(sorted(list(map(int,input().split()))),M):
+    print(*k)
+from itertools import combinations
+N,M = map(int,input().split())
+A = [1]*M
+def make(L):
+    if len(L)==M:
+        return [L]
+    A = []
+    for i in range(L[-1],N+1):
+        A += make(L+[i])
+    return A
+T = []
+for i in range(1,N+1):
+    T += make([i])
+for t in T:
+    print(*t)
+from itertools import combinations
+N,M = map(int,input().split())
+A = sorted(set(map(int,input().split())))
+N = len(A)
+def make(L):
+    if len(L)==M:
+        return [L]
+    A = []
+    for i in range(L[-1],N+1):
+        A += make(L+[i])
+    return A
+T = []
+for i in range(1,N+1):
+    T += make([i])
+for t in T:
+    print(*[A[i-1] for i in t])
+import sys
+input = sys.stdin.readline
+N,M = map(int,input().split())
+L = list(map(int,input().split()))
+L.sort()
+from itertools import permutations
+A= []
+for p in permutations(list(range(N)),M):
+    A.append([L[i] for i in p])
+SA = sorted(A)
+LtS = lambda x : " ".join([str(i) for i in x])
+A = set()
+K=[]
+for l in SA:
+    s = LtS(l)
+    if s in A: continue
+    A.add(s)
+    K.append(s)
+print(*K,sep="\n")
+
+import sys
+sys.setrecursionlimit(10**6)
+input = sys.stdin.readline
+N,R,Q = map(int, input().split()) 
+G = [[] for _ in range(N+1)]
+for _ in range(N-1):
+    a,b = map(int,input().split())
+    G[a].append([b,1])
+    G[b].append([a,1])
+def doDown(p,cur):
+    for idx,g in enumerate(G[cur]):
+        if g[0]==p: continue
+        G[cur][idx][1] = 0
+        doDown(cur,g[0])
+cnt = [0]*(N+1)
+def count(cur):
+    child = 1
+    for g in G[cur]:
+        if g[1]==0:
+            child += count(g[0])
+    cnt[cur] = child
+    return child
+doDown(0, R)
+count(R)
+for _ in range(Q):
+    print(cnt[int(input())])
+
+input()
+pow = lambda x: 1 if x==0 else 31*pow(x-1)%1234567891
+print(sum([((ord(x)-96)*(pow(i)))%1234567891 for i,x in enumerate(input())])%1234567891)
+import sys
+input = sys.stdin.readline
+ans = []
+for _ in range(int(input())):
+    A = int(input())
+    ans.append(N+N//2+N//3)
+from sys import stdin
+N,M=map(int,input().split())
+name={}
+idx=[]
+for i in range(N):
+    idx.append(A:=stdin.readline().strip())
+    name[A]=i
+for k in range(M):
+    if (A:=stdin.readline().strip()).isdigit():
+        print(idx[int(A)-1])
+    else:
+        print(name[A]+1)
+import sys
+input = sys.stdin.readline
+N = int(input())
+M = [list(map(int,input().split())) for _ in range(N)]
+cnt = {i:[] for i in range(1,7)}
+S = [-1,-1]
+for r in range(N):
+    for c in range(N):
+        if M[r][c] == 9:
+            S = [r,c]
+            M[r][c] = 0
+        elif M[r][c] > 0:
+            cnt[M[r][c]].append((r,c))
+size = 2
+eat = cnt[1]
+ans = 0
+def move(fx,fy,tx,ty):
+    visit = [[0]*N for _ in range(N)]
+    q = [(fx,fy,0)]
+    visit[fx][fy] = 1
+    while q:
+        nq = []
+        for x,y,cnt in q:
+            if x == tx and y == ty:
+                return cnt
+            for dx,dy in [[-1,0],[1,0],[0,-1],[0,1]]:
+                nx,ny = x+dx,y+dy
+                if 0<=nx<N and 0<=ny<N and not visit[nx][ny] and M[nx][ny] <= size:
+                    visit[nx][ny] = 1
+                    nq.append((nx,ny,cnt+1))
+        q = nq
+    return N*N+1
+acc = 0
+while True:
+    if not eat:
+        break
+    eat.sort(key=lambda x:(-move(S[0],S[1],x[0],x[1]),-x[0],-x[1]))
+    r,c = eat.pop()
+    if move(S[0],S[1],r,c) == N*N+1:
+        break
+    acc += 1
+    ans += move(S[0],S[1],r,c)
+    if acc == size and size < 7:
+        eat += cnt[size]
+        acc = 0
+        size += 1
+    S = [r,c]
+print(ans)
+
+        
+a,b,c=map(int,input().split())
+def power(n):
+    if n<=2:
+        return (a**n)%c
+    else:
+        return ((power(n//2)**2)*(a**(n%2)))%c
+print(power(b))
+N=int(input())
+if N==1:
+    print(0)
+    exit()
+is_prime=[True]*(N+1)
+for i in range(2,len(is_prime)):
+    if is_prime[i]==False:continue
+    m=i*2
+    while m<len(is_prime):
+        is_prime[m]=False
+        m+=i
+primes=[n for n,p in enumerate(is_prime) if p==True][2:]
+cnt=0
+high=1
+low=0
+sum=primes[0]
+up=True
+while low<=high:
+    if sum==N:
+        cnt+=1
+        sum-=primes[low]
+        low+=1
+        up=True
+    elif sum<N:
+        if up:
+            if high==len(primes):break
+            sum+=primes[high]
+            high+=1
+        else:
+            sum-=primes[low]
+            low+=1
+            up=True
+    elif sum>N:
+        if up:
+            sum-=primes[low]
+            low+=1
+            up=False
+        else:
+            sum-=primes[high-1]
+            high-=1
+print(cnt)
+import sys
+from heapq import heappop,heappush
+input = sys.stdin.readline
+N,M = map(int,input().split())
+E = {i:[] for i in range(1,N+1)}
+for _ in range(M):
+    a,b,c = map(int,input().split())
+    E[a].append((c,b))
+    E[b].append((c,a))
+def makeMST(a):
+    visit = [False]*(N+1)
+    visit[a] = True
+    q = []
+    for e in E[a]:
+        heappush(q,e)
+    ans = 0
+    maxCost = 0
+    while q:
+        cost,child = heappop(q)
+        if not visit[child]:
+            visit[child] = True
+            ans += cost
+            maxCost = max(maxCost,cost)
+            for e in E[child]:
+                if not visit[e[1]]:
+                    heappush(q,e)
+    return ans-maxCost
+print(makeMST(1))
+
+
+
+K,N=map(int,input().split())
+nums=[]
+div=[]
+for i in range(K):
+    nums.append(int(input()))
+end=max(nums)
+start=max(1,end//N)
+def check(mid):
+    cnt=0
+    for n in nums:
+        cnt+=n//mid
+    return cnt
+while True:
+    mid=(start+end)//2
+    cnt=check(mid)
+    if cnt<N:
+        end=mid-1
+    else:
+        if end-start==1:
+            if check(end)>=N:
+                print(end)
+                break
+            else:
+                print(start)
+                break
+        elif end==start:
+            print(mid)
+            break
+        else:
+            start=mid
+from random import randint
+class Node:
+    def __init__(self, val):
+        self.val = val
+        self.next = None
+        self.prev = None
+        self.down = None
+class SkipList:
+    def __init__(self, list):
+        self.head = Node(-1)
+        now = self.head
+        for n in list:
+            now.next = Node(n)
+            now.next.prev = now
+            now = now.next
+        self.build()
+    def build(self):
+        while True:
+            cnt = 0
+            now = self.head
+            self.head = Node(-1)
+            self.head.down = now
+            downNow = now
+            now = self.head
+            while downNow.next:
+                if randint(0,1):
+                    cnt += 1
+                    newNode = Node(downNow.next.val)
+                    newNode.prev = now
+                    newNode.down = downNow.next
+                    now.next = newNode
+                    now = now.next
+                downNow = downNow.next
+            if cnt <= 1:
+                break
+    def searchAndPop(self, n):
+        # search smallest k that k >= n
+        now = self.head
+        ans = None
+        while now:
+            if now.next and now.next.val > n and (not ans or ans.val > now.next.val):
+                ans = now.next
+            if now.next and now.next.val <= n:
+                now = now.next
+            else:
+                if now.down:
+                    now = now.down
+                else:
+                    return self.pop(ans)
+    def pop(self, node):
+        val = node.val
+        now = node
+        while now and now.val != -1:
+            now.prev.next = now.next
+            if now.next: now.next.prev = now.prev
+            now = now.down
+        return val
+    def __str__(self):
+        # print all skip list in one depth in line
+        depth = self.head
+        ret = []
+        while depth:
+            now = depth
+            line = []
+            while now.next:
+                line.append(str(now.next.val)+"("+str(now.next.prev.val or "None")+")")
+                now = now.next
+                if now.next:
+                    line.append('->')
+            depth = depth.down
+            ret.append(''.join(line))
+        return '\n'.join(ret)
+N,M,K = map(int, input().split())
+pick = list(map(int, input().split()))
+hand = list(map(int, input().split()))
+pick.sort()
+sl = SkipList(pick)
+ans = []
+for h in hand:
+    ans.append(sl.searchAndPop(h))
+print(*ans, sep='\n')
+
+    
+
+
+        
+
+    
+import sys
+input = sys.stdin.readline
+N,M = map(int,input().split())
+A = [list(input().strip()) for _ in range(N)]
+dir = {'L':[0,-1],'R':[0,1],'U':[-1,0],'D':[1,0]}
+def dfs(r,c,i):
+    if type(A[r][c]) == int:
+        if A[r][c] == -1:
+            return i
+        return A[r][c]
+    dr,dc = dir[A[r][c]]
+    A[r][c] = -1
+    A[r][c] = dfs(r+dr,c+dc,i)
+    return A[r][c]
+ans = 0
+for r in range(N):
+    for c in range(M):
+        if not type(A[r][c]) == int:
+            ans += (dfs(r,c,ans) == ans)
+print(ans)
+
+def f(N):
+    r=1
+    for i in range(N,1,-1):
+        r*=i
+    return r
+for i,c in enumerate(str(f(int(input())))[::-1]):
+    if c!='0':
+        print(i)
+        break
+import sys
+input = sys.stdin.readline
+N,M = map(int,input().split())
+R = {}
+for i in range(N+M):
+    a,b = map(int,input().split())
+    R[a-1] = b-1
+visit = [False]*100
+P = [0]
+cnt = 0
+def move(s):
+    while True:
+        if R.get(s)!=None:
+            s = R[s]
+            continue
+        return s
+while P:
+    nP = []
+    for s in P:
+        if s == 99:
+            print(cnt)
+            exit()
+        for i in range(1,7):
+            if s+i>99: break
+            des = move(s+i)
+            if visit[des]: continue
+            visit[des] = True
+            nP.append(des)
+    P = nP
+    cnt+=1
+import sys
+sys.setrecursionlimit(10**6)
+from copy import deepcopy
+
+
+input = sys.stdin.readline
+N,M = map(int,input().split())
+A = [list(input().strip()) for _ in range(N)]
+orgA = deepcopy(A)
+
+drdc = [(0,1),(0,-1),(1,0),(-1,0)]
+group = {}
+
+def dfs(r,c,i):
+    A[r][c] = i
+    group[i] += 1
+    for dr,dc in drdc:
+        if not (0<=r+dr<N and 0<=c+dc<M): continue
+        if A[r+dr][c+dc] == '1': continue
+        if A[r+dr][c+dc] == i: continue
+        dfs(r+dr,c+dc,i)
+now = 0
+
+for r in range(N):
+    for c in range(M):
+        if A[r][c] == '0':
+            group[now] = 0
+            dfs(r,c,now)
+            now += 1
+ansA = []
+for r in range(N):
+    for c in range(M):
+        if orgA[r][c] == '0':
+            ansA.append('0')
+        else:
+            T = {}
+            for dr,dc in drdc:
+                if not (0<=r+dr<N and 0<=c+dc<M) or A[r+dr][c+dc] == '1':
+                    continue
+                if not A[r+dr][c+dc] in T:
+                    T[A[r+dr][c+dc]] = group[A[r+dr][c+dc]]
+            ansA.append(str((sum(T.values())+1)%10))
+    ansA.append('\n')
+print(''.join(ansA))
+            
+    
+
+N,M = map(int,input().split())
+ans = 1
+toBin = bin(M)[2:]
+while True:
+    if not toBin:
+        print(-1)
+        exit()
+    if int(toBin,2) == N:
+        print(ans)
+        exit()
+    if toBin[-1]=="1":
+        toBin = toBin[:-1]+"0"
+        before = int(toBin,2)
+        if before % 10 !=0:
+            print(-1)
+            exit()
+        toBin = bin(before//10)[2:]
+    elif toBin[-1]=="0":
+        toBin = toBin[:-1]
+    ans += 1
+
+M,N=map(int,input().split())
+dp=[None]*200001
+bfs=[N]
+t=0
+while bfs:
+    nb=[]
+    for b in bfs:
+        if not dp[b]: dp[b]=t
+        if b==M:
+            nb.clear()
+            break
+        if b%2==0 and not dp[b//2]:nb.append(b//2)
+        if b>0 and not dp[b-1]: nb.append(b-1)
+        if not dp[b+1]: nb.append(b+1)
+    bfs=nb
+    t+=1
+print(dp[M])
+import sys
+input = iter(open(0).read().split("\n")).__next__
+D = list(map(int,input().split()))[::-1]
+T = []
+cnt = 0
+ripe = []
+box = set()
+def inputR(axis,pos):
+    global ripe,cnt
+    if axis == 10:
+        global cnt
+        line = list(map(int,input().split()))
+        for i in range(len(line)):
+            if line[i]==-1:continue
+            cnt+=1
+            if line[i]==1:
+                ripe.append(pos+[i])
+                box.add(str(pos+[i]))
+        return line
+    else:
+        now = []
+        for i in range(D[axis]):
+            now.append(inputR(axis+1,pos+[i]))
+    return now
+dMatrix = []
+def get(M,pos,idx = 0):
+    if not 0<=pos[idx]<len(M): return None
+    if idx==10: return M[pos[idx]] 
+    else: return get(M[pos[idx]],pos,idx+1)
+for dir in [-1,1]:
+    for dim in range(11):
+        dMatrix.append([dir if i==dim else 0 for i in range(11)])
+sumP = lambda x,y:[a+b for a,b in zip(x,y)]
+posCheck = lambda x: all([0<=x<y for x,y in zip(x,D)])
+T = inputR(0,[])
+ans = 0
+while len(box)<cnt:
+    ans+=1
+    nr = []
+    for r in ripe:
+        for dM in range(11):
+                for dir in [-1,1]:
+                    now = list(r)
+                    now[dM] += dir
+                    if not posCheck(now):continue
+                    ele = get(T,now)
+                    if ele==0 and not str(now) in box:
+                        nr.append(now)
+                        box.add(str(now))
+                        if len(box)==cnt:
+                            print(ans)
+                            exit()
+    if len(nr)==0:
+        print(-1)
+        exit()
+    ripe = nr
+print(ans)
+import sys
+input = sys.stdin.readline
+R,C,M = map(int,input().split())
+A = [[[] for _ in range(C)] for _ in range(R)]
+
+for _ in range(M):
+    r,c,s,d,z = map(int,input().split())
+    A[r-1][c-1].append((s,d,z,-1))
+
+drdc = [(-1,0),(1,0),(0,1),(0,-1)]
+reverse = [2,1,4,3]
+
+ans = 0
+
+for t in range(C):
+    for r in range(R):
+        if A[r][t]:
+            s,d,z,_ = A[r][t][0]
+            A[r][t] = []
+            ans += z
+            break
+    for r in range(R):
+        for c in range(C):
+            if A[r][c]:
+                orgA = [k for k in A[r][c] if k[-1]!=t]
+                A[r][c] = [k for k in A[r][c] if k[-1]==t]
+                for s,d,z,p in orgA:
+                    dr,dc = drdc[d-1]
+                    nr = (R-1)-abs((dr*s+r)%(2*R-2)-R+1)
+                    nc = (C-1)-abs((dc*s+c)%(2*C-2)-C+1)
+                    if (dr*s+r)%(2*R-2) >= R or (dc*s+c)%(2*C-2) >= C:
+                        d = reverse[d-1]
+                    A[nr][nc].append((s,d,z,t))
+    for r in range(R):
+        for c in range(C):
+            if len(A[r][c]) > 1:
+                A[r][c] = [max(A[r][c],key=lambda a:a[2])]
+
+print(ans)
+import sys
+input = sys.stdin.readline
+N,M = map(int,input().split())
+D = {}
+for i in range(N):
+    a,b = input().split()
+    D[a] = b
+print(*[D[input().strip()] for _ in range(M)], sep='\n')
+_,*N=open(0).readlines()
+N=list(map(int,N))
+S=[[0,0]]
+answer=0
+for n in N:
+    i=0
+    while S[-1][0]>n:
+        answer=max(answer,S[-1][0]*(i+S[-1][1]))
+        _,h=S.pop()
+        i+=h
+    S.append([n,i+1])
+    prev=n
+i=0
+while S:
+    answer=max(answer,S[-1][0]*(i+S[-1][1]))
+    n,h=S.pop()
+    i+=h
+print(answer)
+
+x1,y1,x2,y2 = map(int, input().split())
+x3,y3,x4,y4 = list(map(int, input().split()))
+def ccw(x1,y1,x2,y2,x3,y3):
+    # determinant of (x1,y1), (x2,y2), (x3,y3)
+    S =  x1*y2+x2*y3+x3*y1-x2*y1-x3*y2-x1*y3
+    if S>0:
+        return 1
+    elif S<0:
+        return -1
+    else:
+        return 0
+# is parrallel
+if ccw(x1,y1,x2,y2,x3,y3)*ccw(x1,y1,x2,y2,x4,y4)==0 and ccw(x3,y3,x4,y4,x1,y1)*ccw(x3,y3,x4,y4,x2,y2)==0:
+    if (x1,y1)>(x2,y2):
+        x1,y1,x2,y2 = x2,y2,x1,y1
+    if (x3,y3)>(x4,y4):
+        x3,y3,x4,y4 = x4,y4,x3,y3
+    if (x3,y3)<=(x2,y2) and (x1,y1)<=(x4,y4):
+        print(1)
+    else:
+        print(0)
+else:
+    if ccw(x1,y1,x2,y2,x3,y3)*ccw(x1,y1,x2,y2,x4,y4)<=0 and ccw(x3,y3,x4,y4,x1,y1)*ccw(x3,y3,x4,y4,x2,y2)<=0:
+        print(1)
+    else:
+        print(0)
+import sys
+input = sys.stdin.readline
+N = int(input())
+A = [list(map(int,input().split())) for _ in range(N)]
+ans = 1001*1001
+for i in range(3):
+    # R, G, B for first house
+    dp = [1001*1001]*3
+    dp[i] = A[0][i]
+    for r,g,b in A[1:]:
+        # R, G, B for current house
+        dp = [r+min(dp[1],dp[2]),g+min(dp[0],dp[2]),b+min(dp[0],dp[1])]
+    ans = min([ans]+[dp[x] for x in range(3) if not x == i])
+print(ans)
+import heapq
+file=open('input.txt').readlines()
+N,E=map(int,file[0].split())
+edge={i:[] for i in range(1,N+1)}
+v1=int(file[1])
+for l in file[2:]:
+    f,t,c=map(int,l.split())
+    edge[f].append([t,c])
+cost=["INF"]*(N+1)
+visit=[False]*(N+1)
+cost[v1]=0
+hq=[[0,v1]]
+while hq:
+    toFC,f=heapq.heappop(hq)
+    if visit[f]:continue
+    visit[f]=True
+    cost[f]=toFC
+    for t,c in edge[f]:
+        if not visit[t]:heapq.heappush(hq,[toFC+c,t])
+print(*cost[1:],sep="\n")
+import sys
+input = sys.stdin.readline
+sys.setrecursionlimit(50000)
+N = int(input())
+E = {i:[] for i in range(1,N+1)}
+for _ in range(N-1):
+    f,t,c = map(int,input().split())
+    E[f].append([t,c])
+    E[t].append([f,c])
+P = [{} for i in range(1,N+1)]
+L = [0]*(N+1)
+P = [None]*(N+1)
+P[1] = [-1,0]
+def dfs(prev,idx,level):
+    L[idx]=level
+    P[idx][0] = prev
+    up = 1
+    while True:
+        if P[P[idx][i-1]]
+        P[idx][up]
+    for ch,co in E[idx]:
+        if prev == ch : continue
+        P[ch] = [idx,co]
+        dfs(idx,ch,level+1)
+dfs(-1,1,0)
+A = []
+for _ in range(int(input())):
+    a,b = map(int,input().split())
+    ans = 0
+    while L[a]!=L[b]:
+        if L[a]<L[b]:
+            ans += P[b][1]
+            b = P[b][0]
+        else:
+            ans += P[a][1]
+            a = P[a][0]
+    while a!=b:
+        ans += P[b][1]
+        ans += P[a][1]
+        a = P[a][0]
+        b = P[b][0]
+    A.append(str(ans))
+print('\n'.join(A))
+N = int(input())
+minP = 0
+dp = [0] + [-1]*N
+P = set([i**2 for i in range(0,int(N**.5)+2)])
+def getMin(n,dep):
+    if dp[n]!=-1:
+        return dp[n]
+    if dep==1:
+        return 1 if n in P else 4
+    if n in P: return 1
+    k = 0
+    a = 4
+    while k**2<=n:
+        a = min(a,1+getMin(n-k**2,dep-1))
+        k += 1
+    dp[n] = a
+    return a
+print(getMin(N,4))
+M,N=map(int,input().split())
+A={input():True for _ in range(M)}
+B=[]
+for i in range(N):
+    if A.get(a:=input()):
+        B.append(a)
+print(len(B),*sorted(B),sep="\n")
+N=int(input())
+M=[list(map(int,input().split())) for _ in range(N)]
+def C(sr,sc,er,ec):
+    I=M[sr][sc]
+    for r in range(sr,er):
+        for c in range(sc,ec):
+            if not M[r][c]==I:return False
+    return True
+def S(sr,sc,er,ec):
+    a=[0,0,0]
+    if C(sr,sc,er,ec):
+        a[M[sr][sc]+1]=1
+        return a
+    r=[sr,sr+(er-sr)//3,sr+((er-sr)//3)*2,er]
+    c=[sc,sc+(ec-sc)//3,sc+((ec-sc)//3)*2,ec]
+    p=[]
+    for i in range(3):
+        for j in range(3):
+            p.append([r[i]]+[c[j]]+[r[i+1]]+[c[j+1]])
+    for i in p:
+        if not C(*i):
+            k=S(*i)
+            a=[a[i]+k[i] for i in range(3)]
+        else:
+            a[M[i[0]][i[1]]+1]+=1
+    return a
+print(*S(0,0,len(M),len(M)),sep="\n")
+import sys
+from itertools import combinations
+input = sys.stdin.readline
+N = int(input())
+M = [list(map(int,input().split())) for _ in range(N)]
+start = [(0,i) for i in range(N)] + [(i,0) for i in range(1,N)]
+def fill(how,idx,isFill):
+    if idx == 2*N-1:
+        return True
+    if how[idx]==0:
+        return fill(how,idx+1,isFill)
+    r,c = start[idx]
+    while r<N and c<N:
+        if M[r][c]==1 and not r+c in isFill:
+            nn = fill(how,idx+1,isFill|{r+c})
+            if nn: return nn
+        r += 1
+        c += 1
+    return False
+for i in range(2*N-2,0,-1):
+    for pick in combinations(range(0,2*N-1),i):
+        how = [0]*(2*N-1)
+        for p in pick:
+            how[p] = 1
+        if fill(how,0,set()):
+            print(i)
+            exit()
+print(0)
+N,T=map(int,input().split())
+A=list(map(int,input().split()))
+S=[A[0]]
+for i in A:
+    S.append(S[-1]+i)
+if(S[-1]<T):
+    print(0)
+    exit()
+start=0
+end=len(A)
+while start<end:
+    print(start,end)
+    mid=(start+end)//2
+    for i in range(len(S)-mid):
+        if S[i+mid]-S[i]>=T:
+            end=mid
+            break
+        if i==len(S)-mid-1:
+            start=mid+1
+print(start)
+import sys
+from math import ceil, floor
+input = sys.stdin.readline
+round = lambda x: ceil(x) if x-floor(x) >= 0.5 else floor(x)
+N = [int(input()) for _ in range(int(input()))]
+N.sort()
+T = round(len(N)*0.15)
+if len(N)>0: print(round(sum(N[T:len(N)-T])/(len(N)-2*T)))
+else: print(0)
+import sys
+input = sys.stdin.readline
+N,M,B = map(int,input().split())
+L = []
+for _ in range(N):
+    L.extend(map(int,input().split()))
+L.sort()
+A = [50000000,0]
+S = [0]
+# sum of L from x to y = S[y+1]-S[x]
+for l in L:
+    S.append(S[-1]+l)
+N = N*M
+idx = len(L)-1
+for H in range(L[-1],-1,-1):
+    while L[idx]>H and idx>0:
+        idx -= 1
+    small = H*(idx+1) - S[idx+1]
+    big = S[-1]-S[idx+1] - H*(N-idx-1)
+    time = small+ big*2
+    print(H,idx,small,big,time)
+    if B + big - small >= 0:
+        if time < A[0]:
+            A[0] = time
+            A[1] = H
+print(*A)            
+
+file=open('input.txt')
+for _ in range(int(next(file))):
+    n,m,w=map(int,next(file).split())
+    E=[]
+    for i in range(m):
+        s,e,t=map(int,next(file).split())
+        E.append([s,e,t])
+        E.append([e,s,t])
+    for i in range(w):
+        s,e,t=map(int,next(file).split())
+        E.append([e,s,-t])
+    find=False
+    visit=[False]*(n+1)
+    for v in range(1,n+1):
+        if visit[v]:continue
+        visit[v]=True
+        if find:break
+        cost=[None]*(n+1)
+        cost[v]=0
+        for i in range(1,n+1):
+            for fr,to,C in E:
+                if None!=cost[fr] and ( None==cost[to] or cost[to]>cost[fr]+C):
+                    cost[to]=cost[fr]+C
+                    visit[to]=True
+                    if i==n:
+                        find=True
+    if find:
+        print("YES")
+    else:print("NO")
+nums=[int(input()) for _ in range(int(input()))]
+stack=[]
+now=1
+idx=0
+answer=''
+while idx<len(nums):
+    if stack and nums[idx]==stack[-1]:
+        answer+="-"
+        stack.pop()
+        idx+=1
+    elif idx==len(nums):break
+    else:
+        stack.append(now)
+        answer+='+'
+        now+=1
+        if now>len(nums)+1:
+            break
+if now>len(nums)+1:
+    print('NO')
+else:
+    print(*answer,sep="\n")
+input()
+a=sorted([(v,k) for k,v in enumerate(map(int,input().split()))])
+A=[-1]*len(a)
+cnt=0
+prev=a[0][0]
+for v,k in a:
+    if v!=prev:
+        cnt+=1
+    A[k]=cnt
+    prev=v
+print(*A)
+N=int(input())
+L=list(map(int,input().split()))
+dp=[-1]*len(L)
+dp[-1]=len(L)-1
+sub_sum=[L[0]]
+ans=L[-1]
+for i in range(1,len(L)):
+    sub_sum.append(L[i]+sub_sum[-1])
+for i in range(len(L)-2,-1,-1):
+    dp[i]=dp[i+1] if sub_sum[dp[i+1]]>sub_sum[i] else i
+    ans=max(sub_sum[dp[i]]-(sub_sum[i-1] if i>0 else 0),ans)
+print(ans)
+import heapq
+file=open("input.txt").readlines()
+n,m=map(int,file[:2])
+E={i:[] for i in range(1,n+1)}
+for l in file[2:-1]:
+    s,e,t=map(int,l.split())
+    E[s].append([e,t])
+fr,to=map(int,file[-1].split())
+hq=[[0,fr]]
+cost=[1e9]*(n+1)
+visit=[False]*(n+1)
+while hq:
+    c,v=heapq.heappop(hq)
+    if visit[v]:continue
+    visit[v]=True
+    if v==to:
+        print(c)
+        break
+    for nv,nc in E[v]:
+        if cost[nv]>c+nc:
+            cost[nv]=c+nc
+            heapq.heappush(hq,[c+nc,nv])
+ 
+
+s="("+input()+")"
+r=""
+q=[]
+p={"*":2,"/":2,"+":1,"-":1}
+for c in s:
+    if c=="(":
+        q.append(c)
+    elif c.isalpha():
+        r+=c
+    elif c==")":
+        while q:
+            t=q.pop()
+            if t=="(":break
+            r+=t
+    else:
+        while q[-1]!="(" and p[q[-1]]>=p[c]:r+=q.pop()
+        q.append(c)
+print(r)
+s=input()
+r=""
+def C(s):
+    if len(s)==1:return s
+    else: return B(s[1:-1])
+def B(s):
+    P=A(s)
+    tn=[]
+    for i in range(0,len(P),2):
+        if len(P[i])==1:
+            tn.append(P[i])
+            if i+1<len(P):tn.append(P[i+1])
+            continue
+        K=[]
+        start=0
+        open=0
+        for idx in range(len(P[i])):
+            if P[i][idx]=="(":
+                if open==0:start=idx    
+                open+=1
+            elif P[i][idx]==")":
+                open-=1
+                if open==0:
+                    K.append(P[i][start:idx+1])
+                    start=idx+1
+            else:
+                if open==0:
+                    K.append(P[i][idx])
+                    start=idx+1
+        p=C(K[0])
+        for pp in range(1,len(K),2):
+            p+=C(K[pp+1])
+            p+=K[pp]
+        tn.append(p)
+        if i+1<len(P):tn.append(P[i+1])
+    rr=tn[0]
+    for t in range(1,len(tn),2):
+        rr+=tn[t+1]
+        rr+=tn[t]
+    return rr
+
+def A(s):
+    P=[]
+    start=0
+    open=0
+    for idx in range(len(s)):
+        if s[idx]=="(":open+=1
+        if s[idx]==")":open-=1
+        if s[idx] in ["+","-"] and open==0:
+            P.append(s[start:idx])
+            P.append(s[idx])
+            start=idx+1
+        idx+=1
+    P.append(s[start:])
+    return P
+print(B(s))
+import heapq
+n,*i=open(0).read().split()
+q=[]
+o=[]
+for a in i:
+    a=int(a)
+    if a==0:
+        o.append(0 if not q else heapq.heappop(q))
+    else:
+        heapq.heappush(q,a)
+print(*o,sep="\n")
+primes=[True]*1000000
+primes[1]=False
+f,t=map(int,input().split())
+for i in range(2,t+1):
+    if primes[i]:
+        for j in range(i+i,t+1,i):
+            primes[j]=False
+print(*[x for x in range(f,t+1) if primes[x]],sep="\n")
+I=[list(map(int,input().split())) for _ in range(int(input()))]
+I.sort(key=lambda x:[x[1],x[0]])
+cnt=0
+prev=0
+idx=0
+while idx<len(I):
+    if I[idx][0]>=prev:
+        cnt+=1
+        prev=I[idx][1]
+    idx+=1
+print(cnt)
+
+n,*lines=open('input.txt').readlines()
+n=int(n)
+lines=[list(map(int,l.split())) for l in lines]
+dp=[[None]*(len(lines[-1])) for _ in range(n)]
+def maxS(depth,idx):
+    if depth==n-1:return lines[depth][idx]
+    if dp[depth][idx]:return dp[depth][idx]
+    dp[depth][idx]=max(maxS(depth+1,idx),maxS(depth+1,idx+1))+lines[depth][idx]
+    return dp[depth][idx]
+print(maxS(0,0))
+for _ in range(int(input())):
+    n,w=map(int,input().split())
+    pr=[[p,x] for x,p in enumerate(list(map(int,input().split())))]
+    while True:
+        if max([x[0] for x in pr])>pr[0][0]:
+            pr=pr[1:]+[pr[0]]
+        else:
+            if pr[0][1]==w:
+                print(n-len(pr)+1)
+                break
+            pr=pr[1:]
+file=open('input.txt')
+from sys import setrecursionlimit
+setrecursionlimit(10**6)
+n,*lines=file.readlines()
+n=int(n)
+E={i:[] for i in range(1,n+1)}
+for l in lines:
+    s,e,t=map(int,l.split())
+    E[s].append([e,t])
+    E[e].append([s,t])
+dia=1
+def dfs(N,prev):
+    global dia
+    if len(E[N])==1 and E[N][0][0]==prev:
+        return 0
+    Ncost=[dfs(a[0],N)+a[1] for a in E[N] if a[0]!=prev]
+    Ncost.sort(reverse=True)
+    if len(Ncost)>1:dia=max(dia,sum(Ncost[:2]))
+    return(Ncost[0])
+Ncost=[dfs(a[0],1)+a[1] for a in E[1]]
+Ncost.sort(reverse=True)
+if len(Ncost)>1: dia=max(dia,sum(Ncost[:2]))
+dia=max(dia,Ncost[0])
+print(dia)
+
+
+primes=[True]*1001
+primes[1]=False
+input()
+for i in range(2,1001):
+    if primes[i]:
+        for j in range(i+i,1001,i):
+            primes[j]=False
+print(sum(primes[x] for x in list(map(int,input().split()))))
+R,C = map(int,input().split())
+B=[list(input()) for _ in range(R)]
+M=lambda x,y:2**(ord(B[x][y])-ord('A'))
+P={(0,0,M(0,0))}
+answer=0
+while P:
+    answer+=1
+    NP=[]
+    for r,c,m in P:
+        for x,y in [(-1,0),(0,1),(0,-1),(1,0)]:
+            if 0<=r+x<R and 0<=c+y<C and m&M(r+x,c+y)==0:
+                NP.append((r+x,c+y,m|M(r+x,c+y)))
+    P={*NP}
+print(answer)
+A={}
+for _ in range(int(input())):
+    p,l,r=input().split()
+    A[p]=[None,None]
+    if not l==".":A[p][0]=l
+    if not r==".":A[p][1]=r
+def preorder(n):
+    if n==None:return ""
+    return n+preorder(A[n][0])+preorder(A[n][1])
+def midorder(n):
+    if n==None:return ""
+    return midorder(A[n][0])+n+midorder(A[n][1])
+def lastorder(n):
+    if n==None:return ""
+    return lastorder(A[n][0])+lastorder(A[n][1])+n
+print(preorder("A"))
+print(midorder("A"))
+print(lastorder("A"))
+M=[list(input()) for _ in range(int(input()))]
+def C(sr,sc,er,ec):
+    I=M[sr][sc]
+    for r in range(sr,er):
+        for c in range(sc,ec):
+            if not M[r][c]==I:return False
+    return True
+def S(sr,sc,er,ec):
+    if C(sr,sc,er,ec):
+        return M[sr][sc]
+    r=[sr,sr+(er-sr)//2,er]
+    c=[sc,sc+(ec-sc)//2,ec]
+    p=[]
+    for i in range(2):
+        for j in range(2):
+            p.append([r[i]]+[c[j]]+[r[i+1]]+[c[j+1]])
+    a=""
+    for i in p:
+        a+=S(*i)
+    return "("+a+")"
+print(S(0,0,len(M),len(M)))
+import sys 
+sys.setrecursionlimit(10**6)
+input = sys.stdin.readline
+N,M,K = map(int,input().split())
+C = list(map(int,input().split()))
+E = {i: [] for i in range(1,N+1)}
+for _ in range(M):
+    a,b = map(int,input().split())
+    E[a].append(b)
+    E[b].append(a)
+group = {}
+visit = [False]*(N+1)
+def dfs(now,idx):
+    group[idx].append(now)
+    visit[now] = True
+    for nxt in E[now]:
+        if not visit[nxt]:
+            dfs(nxt,idx)
+idx = 0
+for i in range(1,N+1):
+    if not visit[i]:
+        group[idx] = []
+        dfs(i,idx)
+        idx += 1
+sums = [sum([C[group[g][i]-1] for i in range(len(group[g]))]) for g in range(idx)]
+dp = [0]*(K)
+nxt_dp = [0]*(K)
+for g in range(idx):
+    for k in range(K):
+        nxt_dp[k] = max(dp[k],dp[k-len(group[g])]+sums[g]) if k >= len(group[g]) else dp[k]
+    dp,nxt_dp = nxt_dp,dp
+print(dp[-1])
+import sys
+from collections import defaultdict
+input = sys.stdin.readline
+for _ in range(int(input())):
+    input()
+    P = input().strip().split()
+    cnt = {i:defaultdict(int) for i in range(1,5)}
+    for p in P:
+        for mask in range(16):
+            bit = bin(mask)[2:].zfill(4)
+            flag = ''.join([p[i] for i in range(4) if bit[i]=='1'])
+            if 1<=len(flag)<=4:
+                cnt[len(flag)][flag] += 1
+    for i,a in [[4,0],[3,2],[2,4],[1,6]]:
+        if any([k>2 for k in cnt[i].values()]):
+            print(a)
+            break
+        if i==2:print(8)
+    
+m=int(input())
+a,b,c=0,0,0
+d,e,f=0,0,0
+for _ in range(m):
+    x,y,z = map(int,input().split())
+    a,b,c=max(a,b)+x,max([a,b,c])+y,max(b,c)+z
+    d,e,f=min(d,e)+x,min([d,e,f])+y,min(e,f)+z
+print(max(a,b,c),min(d,e,f))
+N=int(input())
+C=[list(map(int,input().split())) for _ in range(N)]
+dp=[[-1]*(2**(N)) for _ in range(N)]
+def getDp(idx,mask):
+    if dp[idx][mask]!=-1:return dp[idx][mask]
+    if mask==(2**(N)-1):dp[idx][mask]= C[idx][0] if C[idx][0]!=0 else 16000001
+    else:
+        P=[getDp(x,mask|(2**x))+C[idx][x] for x in range(N) if x!=idx and C[idx][x]!=0 and mask&(2**x)==0]
+        dp[idx][mask]=min(P) if P else 16000001
+    return dp[idx][mask]
+print(getDp(0,1))
+K,*N=open(0)
+N=list(map(int,N))
+N.sort()
+counter={x:0 for x in N}
+for n in N:
+    counter[n]+=1
+count=[[v,-k] for k,v in counter.items()]
+count.sort(reverse=True)
+if len(count)>1 and count[1][0]==count[0][0]:
+    many=-1*count[1][1]
+else:
+    many=-1*count[0][1]
+print(round(sum(N)/len(N)),N[len(N)//2],many,N[-1]-N[0])
+atEven = {}
+S = input()
+for i,k in enumerate(S):
+    if k in atEven:
+        if atEven[k]==4:
+            print("NO")
+            exit()
+        if S[i-1]==S[i]:
+            atEven[k]=4
+        elif atEven[k] == (3 if (i%2==0) else 2):
+            print("NO")
+            exit()
+        else:
+            atEven[k] = 4
+    else: atEven[k] = 3 if (i%2==0) else 2
+print("YES")
+T= int(input())
+N = int(input())
+A= list(map(int,input().split()))
+M= int(input())
+B= list(map(int,input().split()))
+subA = [0]
+subB= [0]
+for i in A:
+    subA.append(subA[-1]+i)
+for i in B:
+    subB.append(subB[-1]+i)
+cntB = {}
+for f in range(M):
+    for t in range(f+1,M+1):
+        fTot = subB[t]-subB[f]
+        if fTot in cntB: cntB[fTot]+=1
+        else: cntB[fTot] = 1
+ans = 0
+for f in range(N):
+    for t in range(f+1,N+1):
+        fTot = subA[t]-subA[f]
+        if T-fTot in cntB:
+            ans += cntB[T-fTot]
+print(ans)
+import sys
+input = sys.stdin.readline
+P = [list(map(int, input().split())) for _ in range(int(input()))]
+M = [[i] for i in range(len(P))]
+G = list(range(len(P)))
+def ccw(p1, p2, p3):
+    return (p1[0]*p2[1] + p2[0]*p3[1] + p3[0]*p1[1]) - (p2[0]*p1[1] + p3[0]*p2[1] + p1[0]*p3[1])
+def intersect(A,B,C,D):
+    X = ccw(A,B,C)*ccw(A,B,D)
+    Y = ccw(C,D,A)*ccw(C,D,B)
+    if X == 0 and Y == 0:
+        if A > B:
+            A,B = B,A
+        if C > D:
+            C,D = D,C
+        return C <= B and A <= D
+    return X <= 0 and Y <= 0
+for i in range(len(P)):
+    A = P[i][:2]
+    B = P[i][2:]
+    for j in range(i+1, len(P)):
+        if G[i] == G[j]:
+            continue
+        C = P[j][:2]
+        D = P[j][2:]
+        if intersect(A,B,C,D):
+            smallG = G[i]
+            bigG = G[j]
+            if len(M[smallG]) > len(M[bigG]):
+                smallG, bigG = bigG, smallG
+            for k in M[smallG]:
+                M[bigG].append(k)
+                G[k] = bigG
+            M[smallG] = []
+A = [i for i in M if i]
+print(len(A))
+print(max(len(i) for i in A))
+N=int(input())
+a=1
+d=1
+nm=False
+nr=0
+while N>1:
+    if nm==False:
+        a=a+d
+    NN=N//2+(1 if nm and N%2==1 else 0)
+    nm=nm if N%2==0 else not nm
+    d=d*2
+    N=NN
+print(a)
+print(int(bin(int(i:=input())*42)[3:],2)or i)
+import sys
+input = sys.stdin.readline
+P = [list(map(int,input().split())) for _ in range(int(input()))]
+def deter(a,b):
+    return a[0]*b[1]-a[1]*b[0]
+P.append(P[0])
+print(round(0.5*abs(sum([deter(P[idx],P[idx+1]) for idx in range(len(P)-1)])),1))
+
+import sys
+input = sys.stdin.readline
+N,M = map(int,input().split())
+I = None
+A = [input() for _ in range(N)]
+for i in range(N):
+    for j in range(M):
+        if A[i][j] == 'I':
+            I = (i,j)
+            break
+    if I: break
+P = [I]
+visit = [[False]*M for _ in range(N)]
+visit[I[0]][I[1]] = True
+cnt = 0
+while P:
+    nP = []
+    for i,j in P:
+        for ni,nj in (i-1,j),(i+1,j),(i,j-1),(i,j+1):
+            if not (0<=ni<N and 0<=nj<M): continue
+            if A[ni][nj] == 'X': continue
+            if visit[ni][nj]: continue
+            if A[ni][nj] == 'P':
+                cnt+=1
+            visit[ni][nj] = True
+            nP.append((ni,nj))
+    P = nP
+print(cnt if cnt else 'TT')
+N,M=map(int,input().split())
+A=[list(input()) for _ in range(N)]
+bfs=[[0,0]]
+cnt=1
+dr=[-1,0,0,1]
+dc=[0,1,-1,0]
+while bfs:
+    if [N-1,M-1] in bfs:
+        break
+    nb=[]
+    for r,c in bfs:
+        for i in range(4):
+            nr=r+dr[i]
+            nc=c+dc[i]
+            if 0<=nr<N and 0<=nc<M and A[nr][nc]=="1":
+                nb.append([nr,nc])
+                A[nr][nc]="2"
+    bfs=nb
+    cnt+=1
+print(cnt)
+import sys
+input= sys.stdin.readline
+N,M=map(int,input().split())
+raw=[list(map(int,input().split())) for _ in range(N)]
+T=int(input())
+P=[]
+for line in raw:
+    p=[]
+    for i in range(0,len(line),3):
+        p.append(1 if sum(line[i:i+3])/3>=T else 0)
+    P.append(p)
+print(P)
+def dfs(r,c):
+    if P[r][c]==2:return
+    P[r][c]=2
+    for dr,dc in [[-1,0],[0,1],[0,-1],[1,0]]:
+        if not (0<=r+dr<N and 0<=c+dc<M):continue
+        if P[r+dr][c+dc]==1: dfs(r+dr,c+dc)
+ans=0
+for r in range(N):
+    for c in range(M):
+        if P[r][c]==1:
+            ans+=1
+            dfs(r,c)
+print(ans)
+S,*M=open('input.txt').readlines()
+n,m=map(int,S.split())
+M=[list(map(int,list(l.strip()))) for l in M]
+V=[[0,0,0]]
+drdc=[[-1,0],[1,0],[0,1],[0,-1]]
+visit=[[[False,False] for _ in range(m)] for _ in range(n)]
+answer=0
+while V:
+    nV=[]
+    for r,c,b in V:
+        if visit[r][c][0] or (b==1 and visit[r][c][1]):continue
+        visit[r][c][b]=True
+        if [r,c]==[n-1,m-1]:
+            nV=[]
+            break
+        for dr,dc in drdc:
+            nr,nc=r+dr,c+dc
+            if 0<=nr<n and 0<=nc<m:
+                if b==0 and M[nr][nc]==1 and not True in visit[nr][nc]:
+                    nV.append([nr,nc,1])
+                if M[nr][nc]==0 and not visit[nr][nc][b]:
+                    nV.append([nr,nc,b])
+    V=nV
+    answer+=1
+print(answer if True in visit[-1][-1] else -1)
+
+N=int(input())
+i=1
+while True:
+    if i+sum(list(map(int,list(str(i)))))==N:
+        print(i)
+        break
+    i+=1
+    if i>=N:
+        print(0)
+        break
+org=[list(map(int,list(input()))) for _ in range(9)]
+NN=[[r,c] for r in range(9) for c in range(9)]
+boxPos=[[[0, 0], [0, 1], [0, 2], [1, 0], [1, 1], [1, 2], [2, 0], [2, 1], [2, 2]], [[0, 3], [0, 4], [0, 5], [1, 3], [1, 4], [1, 5], [2, 3], [2, 4], [2, 5]], [[0, 6], [0, 7], [0, 8], [1, 6], [1, 7], [1, 8], [2, 6], [2, 7], [2, 8]], [[3, 0], [3, 1], [3, 2], [4, 0], [4, 1], [4, 2], [5, 0], [5, 1], [5, 2]], [[3, 3], [3, 4], [3, 5], [4, 3], [4, 4], [4, 5], [5, 3], [5, 4], [5, 5]], [[3, 6], [3, 7], [3, 8], [4, 6], [4, 7], [4, 8], [5, 6], [5, 7], [5, 8]], [[6, 0], [6, 1], [6, 2], [7, 0], [7, 1], [7, 2], [8, 0], [8, 1], [8, 2]], [[6, 3], [6, 4], [6, 5], [7, 3], [7, 4], [7, 5], [8, 3], [8, 4], [8, 5]], [[6, 6], [6, 7], [6, 8], [7, 6], [7, 7], [7, 8], [8, 6], [8, 7], [8, 8]]]
+def possible(MM,r,c,n):
+    for i in range(9):
+        if MM[r][i]==n:return False
+        if MM[i][c]==n:return False
+    for r,c in boxPos[r//3*3+c//3]:
+        if MM[r][c]==n: return False
+    return True
+def solve(M):
+    global org
+    for r,c in NN:
+        if M[r][c]!=0:continue
+        for i in range(1,10):
+            if possible(M,r,c,i):
+                MM=[line[:] for line in M]
+                MM[r][c]=i
+                if solve(MM):
+                    org[r][c]=i
+                    return True
+        return False
+    return True
+solve(org)
+print(*map("".join,[[str(k) for k in l] for l in org]),sep="\n")
+from copy import deepcopy
+M=[list(map(int,list(input()))) for _ in range(9)]
+NN=[[r,c] for r in range(9) for c in range(9)]
+def boxPos(r,c):
+    pos=[]
+    for i in range(3):
+        for j in range(3):
+            pos.append([r//3*3+i,c//3*3+j])
+    return pos
+def print_candi(cd):
+    buffer=[""]*3
+    for r in range(9):
+        for c in range(9):
+            for i in range(1,10):
+                buffer[(i-1)//3]+=str(i) if cd[r][c] and i in cd[r][c] else " "
+            for i in range(0,3):
+                buffer[i]+="|"
+        print(*buffer,sep="\n",end="\n------------------------------------\n")
+        buffer=[""]*3
+    print("\n\n\n")
+def find_candi(r,c):
+    C=[False]*9
+    for i in range(9):
+        if M[r][i]!=0:C[M[r][i]-1]=True
+        if M[i][c]!=0:C[M[i][c]-1]=True
+    for r,c in boxPos(r,c):
+        if M[r][c]!=0:
+            C[M[r][c]-1]=True
+    return [i+1 for i,c in enumerate(C) if c==False]
+def set_candi():
+    candies=[[None]*9 for _ in range(9)]
+    for r in range(9):
+        for c in range(9):
+            if M[r][c]==0:candies[r][c]=find_candi(r,c)
+    return candies
+def deter(candi,r,c,d):
+    global M
+    for i in range(9):
+        if i==c:continue
+        if candi[r][i] and d in candi[r][i]:
+            candi[r][i].remove(d)
+            if len(candi[r][i])==1:
+                if not deter(candi,r,i,cd:=candi[r][i][0]): return False
+                else:candi[r][i]=None;M[r][i]=cd
+            elif len(candi[r][i])==0:
+                return False
+    for i in range(9):
+        if i==r:continue
+        if candi[i][c] and d in candi[i][c]:
+            candi[i][c].remove(d)
+            if len(candi[i][c])==1:
+                if not deter(candi,i,c,cd:=candi[i][c][0]): return False
+                else:candi[i][c]=None;M[i][c]=cd  
+            elif len(candi[i][c])==0:
+                return False
+    for i,j in boxPos(r,c):
+        if [i,j]==[r,c]:continue
+        if candi[i][j] and d in candi[i][j]:
+            candi[i][j].remove(d)
+            if len(candi[i][j])==1:
+                if not deter(candi,i,j,cd:=candi[i][j][0]): return False
+                else:candi[i][j]=None;M[i][j]=cd
+            elif len(candi[i][j])==0:
+                return False
+    return True
+def choose_candi(candi):
+    global M
+    for r,c in NN:
+        if candi[r][c]:
+            for choose in candi[r][c]:
+                new_candi=deepcopy(candi)
+                if deter(new_candi,r,c,choose):
+                    new_candi[r][c]=None
+                    if choose_candi(new_candi):
+                        M[r][c]=choose
+                        return True
+            return False
+sc=set_candi()
+for r,c in NN:
+    if sc[r][c] and len(sc[r][c])==1:
+        deter(sc,r,c,sc[r][c][0])
+        M[r][c]=sc[r][c][0]
+        sc[r][c]=None
+choose_candi(sc)
+print(*map("".join,[[str(k) for k in l] for l in M]),sep="\n",end="\n\n")
+import sys
+sys.setrecursionlimit(10**7)
+input = sys.stdin.readline
+N,M = map(int,input().split())
+parent = {i:[] for i in range(1,N+1)}
+child = {i:[] for i in range(1,N+1)}
+for _ in range(M):
+    f,t = map(int,input().split())
+    child[f].append(t)
+    parent[t].append(f)
+visited = [False]*(N+1)
+ans = []
+def visitParent(node):
+    if visited[node]:return
+    visited[node] = True
+    for p in parent[node]:
+        visitParent(p)
+    ans.append(node)
+def visit(node):
+    if visited[node]:return
+    visited[node] = True
+    for p in parent[node]:
+        visitParent(p)
+    ans.append(node)
+    for c in child[node]:
+        visit(c)
+for i in range(1,N+1):
+    visit(i)
+print(*ans)
+import sys
+sys.setrecursionlimit(int(1e6))
+input()
+A=input().split()
+B=input().split()
+A=B=[i for i in range(1,100000)]
+I={c:i for i,c in enumerate(A)}
+s=[]
+def tf(a,b,c,d):
+    global s
+    print(a,b,c,d)
+    if None in [a,b,c,d]:return
+    s+=[B[d]]
+    if b-a==0:return
+    tf(a if I[B[d]]>a else None,I[B[d]]-1 if I[B[d]]>a else None,c if I[B[d]]>a else None,c+I[B[d]]-1-a if I[B[d]]>a else None)
+    tf(I[B[d]]+1 if I[B[d]]<b else None,b,d-b+I[B[d]] if I[B[d]]<b else None,d-1)
+tf(0,len(A)-1,0,len(B)-1)
+print(*s)
+from math import ceil
+from math import sqrt
+print(ceil((3+sqrt(12*int(input())-3))/6))
+import sys
+sys.setrecursionlimit(10**6)
+L=list(map(int,input().split()))[:-1]
+dp = [[[None]*5 for _ in range(5)] for _ in range(len(L))]
+def cost(now,nxt):
+    if now == 0: return 2
+    if abs(now-nxt) == 2:return 4
+    else : return 3
+def move(nowL,nowR,tar):
+    if tar in [nowL,nowR]:
+        return [[nowL,nowR,1]]
+    return [[tar,nowR,cost(nowL,tar)],[nowL,tar,cost(nowR,tar)]]
+def getDP(left,right,idx):
+    if idx==len(dp)-1:
+        return min([x[2] for x in move(left,right,L[idx])])
+    if dp[idx][left][right] !=None: return dp[idx][left][right]
+    dp[idx][left][right]= min([getDP(x,y,idx+1)+z for x,y,z in move(left,right,L[idx])])
+    return dp[idx][left][right]
+print(getDP(0,0,0))
+def combi(n,m):
+    k=1
+    for i in range(m):
+        k*=(n-i)
+    for i in range(1,m+1):
+        k=k//i
+    return k
+n,m=map(int,input().split())
+print(combi(n,m))
+import sys
+input=sys.stdin.readline
+sys.setrecursionlimit(300000)
+o=sorted([list(map(int,input().split())) for _ in range(int(input()))])
+k=[]
+left=right=0
+for l,r in o:
+    if l<=right:
+        right=max(r,right)
+    else:
+        k.append([left,right])
+        left=l
+        right=r
+k.append([left,right])
+dp=[-1]*len(k)
+
+def dfs(i):
+    if dp[i]!=-1:return dp[i]
+    a=[k[i][1]]
+    for nxt in range(i+1,len(k)):
+        if k[i][1]-k[i][0]>=k[nxt][0]-k[i][1]:
+            a.append(dfs(nxt))
+        else:break
+    dp[i]=max(a)
+    return dp[i]
+print(dfs(0)) 
+N=int(input())
+for i in range(1,N+1):
+    print(" "*(N-i)+"*"*i)
+import sys
+sys.setrecursionlimit(int(1e8))
+n=int(input())
+k=len(bin(n//3))-2
+unit=["  *  "," * * ","*****"]
+def star(size):
+    if size==1:
+        return unit
+    return resize(star(size-1),6*(2**(size-1))-1)+[s+" "+s for s in star(size-1)]
+def resize(org,size):
+    margin=(size-len(org[0]))//2
+    resized=[]
+    for i in range(len(org)):
+        resized.append(" "*margin+org[i]+" "*margin)
+    return resized
+print(*star(k),sep="\n")
+input()
+N=list(map(int,input().split()))
+A=[-1]*len(N)
+prev=0
+for i in range(len(N)):
+    if N[i]!=N[prev]:
+        for j in range(prev,i,1):
+            A[j]=i+1
+        prev=i
+print(*A,sep=" ")
+
+S=input()
+T=input()
+C=[[] for _ in range(26)]
+for i in range(len(S)-1,-1,-1):
+    C[ord(S[i])-97].append(i)
+A=0
+while True:
+    prev=-1
+    ok=False
+    for i in range(len(T)):
+        idx=ord(T[i])-97
+        nt=False
+        while C[idx]:
+            pos=C[idx].pop()
+            if pos>prev:
+                prev=pos
+                if i==len(T)-1:
+                    A+=1    
+                    ok=True 
+                nt=True
+                break
+        if not nt:break
+    if not ok:break
+print(A)
+'''
+from random import randint
+S="".join([chr(randint(ord('A'),ord('Z'))) for _ in range(10000)])
+print(S)
+'''
+import sys
+sys.setrecursionlimit(100001)
+S=input()
+ans=-1
+diff=[0]*len(S)
+r={0:-1}
+acc=0
+for i in range(len(S)):
+    if S[i]=="K":acc+=1
+    if S[i]=="S":acc-=2
+    diff[i]=acc
+ok={}
+for i in range(len(S)):
+    if r.get(diff[i])!=None:
+        if (i>0 and diff[i]!=diff[i-1]) or ok.get(diff[i]):
+            ans=max(ans,i-r[diff[i]])
+            ok[diff[i]]=True
+            print(i,ans,diff[i])
+    else:
+        r[diff[i]]=i
+print(ans)
+import sys
+sys.setrecursionlimit(100001)
+input=sys.stdin.readline
+N,M=map(int,input().split())
+E={i:[] for i in range(1,N+1)}
+for _ in range(M):
+    f,t=map(int,input().split())
+    E[f].append(t)
+dp=[None]*(N+1)
+def hasCycle(idx,route):
+    if dp[idx]!=None:return dp[idx]
+    route.add(idx)
+    for t in E[idx]:
+        if t in route:
+            dp[idx]=True
+            return True
+        dp[idx]=hasCycle(t,route)
+        if dp[idx]==True:
+            return True
+    dp[idx]=False
+    route.remove(idx)
+    return False
+cycle=[hasCycle(i,set()) for i in range(1,N+1)]
+print(cycle.count(False))
+import sys
+from bisect import bisect_right
+input=sys.stdin.readline
+H=int(input())+1
+Q,R=map(int,input().split())
+F=[i*(i-1)//2+1 for i in range(1,H+1)]
+sumE=[]
+answer=[]
+E=[0]*(H+2)
+def getRC(idx):
+    return bisect_right(F,idx)
+def getLR(idx):
+    global H
+    r=getRC(idx)
+    ld=(r+H-1)*(H-r)//2
+    rd=(r+H+1)*(H-r)//2
+    return [idx+ld-H*(H-1)//2-1,idx+rd-H*(H-1)//2-1]
+def drop(a,b):
+    left,right=getLR(a)
+    E[left]+=b/(right-left+1)
+    if right<len(E):E[right+1]-=b/(right-left+1)
+def getE(a,b):
+    S=sumE[b-1]-(sumE[a-2] if a-2>=0 else 0)
+    return S
+for _ in range(Q):
+    a,b=map(int,input().split())
+    drop(a,b)
+for e in E:
+    sumE.append(e+(sumE[-1] if sumE else 0))
+for i in range(len(sumE)):
+    sumE[i]=sumE[i]+(sumE[i-1] if i>0 else 0)
+answer=[]
+for _ in range(R):
+    a,b=map(int,input().split())
+    answer.append(getE(a,b))
+print(*answer,sep="\n")
+import sys
+from random import randint
+sys.setrecursionlimit(2000000)
+S=[]
+for _ in range(10):
+    while True:
+        c=chr(randint(97,122))
+        if not S or S[-1][0]!=c:break
+    S.append([c,randint(1,1000000000)])
+S=[['z', 760140385], ['e', 560155727], ['m', 598329902], ['e', 560155727], ['k', 739013909],  ['e', 560155727],['u', 158371459], ['p', 156896452], ['g', 675073331], ['k', 980550489], ['h', 5392182], ['y', 406729727]]
+print(S)
+'''
+N,*lines=open(0).readlines()
+for line in lines:
+    a,b=line.split()
+    S.append([a,int(b)])
+'''
+dp=[[None]*27 for _ in range(len(S)-1)]+[[S[-1][1] if chr(i+97)!=S[-1][0] else 0 for i in range(26)]+[S[-1][1]]]
+for idx in range(len(S)-2,-1,-1):
+    for char in range(27):
+        if char==26:
+            dp[idx][26]=((dp[idx+1][ord(S[idx][0])-97]+1)*(S[idx][1])+dp[idx+1][26])
+        if char==(ord(S[idx][0])-97):
+            dp[idx][char]=dp[idx+1][char]
+        else:
+            dp[idx][char] = (S[idx][1]*(dp[idx+1][26]+1)+dp[idx+1][char])
+print(dp[0][26]%998244353)
+input()
+N = list(map(int,input().split()))
+A = [N[0],N[1]]
+def bisect_left(idx):
+    left = idx+1
+    right = len(N) - 1
+    while left <= right:
+        mid = (right+left)//2
+        if N[mid] < -N[idx]:
+            left = mid+1
+        else:
+            right = mid-1
+    return left
+first = -1
+for idx in range(len(N)-1):
+    if not first and N[idx]>=0:
+        first = idx
+        break
+    left = bisect_left(idx)
+    if idx==left-1:
+        break 
+    if left == len(N):
+        if abs(sum(A)) > abs(N[idx]+N[left-1]):
+            A = [N[idx],N[left-1]]
+    elif left-1==idx:
+        A = sorted([A,[N[idx],N[left]]],key=lambda x:abs(sum(x)))[0]
+    else:
+        A = sorted([A,[N[idx],N[left]],[N[idx],N[left-1]]],key=lambda x:abs(sum(x)))[0]
+print(*A)
+
+input()
+A = sorted(list(map(int,input().split())))
+S = A[:3]
+for k in range(len(A)-2):
+    l = k+1
+    r = len(A)-1
+    while (l<r):
+        s = A[l]+A[r]+A[k]
+        if abs(sum(S))>abs(s):S=[A[k],A[l],A[r]]
+        if s<0:l+=1
+        else:r-=1
+print(*S)
+a=max([[x,i] for i,x in enumerate([int(input()) for _ in range(9)])])
+print(a[0])
+print(a[1]+1)
+N=int(input())
+print("long "*(N//4)+"int")
+def ccw(x1,y1,x2,y2,x3,y3):
+    return (x2-x1)*(y3-y1)-(y2-y1)*(x3-x1)
+s=[]
+from sys import stdin
+for i in range(int(input())):
+    s.append(list(map(int,stdin.readline().split())))
+s.sort(key=lambda x:x[-1])
+now=0
+for i in range(len(s)):
+    cnt=1
+    for j in range(i+1,len(s)):
+        x1,y1,x2,y2,w12=s[i]
+        x3,y3,x4,y4,w34=s[j]
+        if not (ccw(x1,y1,x2,y2,x3,y3) *ccw(x1,y1,x2,y2,x4,y4)>0 or ccw(x3,y3,x4,y4,x1,y1)* ccw(x3,y3,x4,y4,x2,y2)>0):
+            cnt+=1
+    now+=cnt*s[i][-1]
+print(now)
+
+import sys
+input = sys.stdin.readline
+L = []
+for i in range(int(input())):
+    L.append(list(map(int,input().split())))
+M = [[0,[]]] + [[500001,[]] for _ in range(len(L))]
+L.sort()
+def find(arr, x):
+    l, r = 0, len(arr)
+    # find the first element that is smaller than x
+    while l<r:
+        m = (l+r)//2 + (1 if (l+r)%2==1 else 0)
+        if arr[m][0] < x:
+            l = m
+        else:
+            r = m - 1
+    return l
+for idx,v in L:
+    i = find(M,v)
+    if M[i][0] < v < M[i+1][0]:
+        M[i+1][0] = v
+        M[i+1][1] = M[i][1] + [idx]
+for i in range(len(M)-1,0,-1):
+    if M[i][1] != []:
+        S = set(M[i][1])
+        print(len(L)-len(S))
+        A = []
+        for k in sorted([x[0] for x in L]):
+            if k not in S:
+                A.append(k)
+        print('\n'.join(map(str,A)))
+        exit()
+r=1
+for _ in range(3):
+    r*=int(input())
+cnt={str(i):0 for i in range(10)}
+for i in str(r):
+    cnt[i]+=1
+for v in cnt.values():
+    print(v)
+S=[int(input()) for _ in range(int(input()))]
+dp=[[-1,-1] for _ in range(len(S))]
+dp[-1]=[S[-1],S[-1]]
+def dfs(N,C):
+    if N!=-1 and not dp[N][C]==-1:
+        return dp[N][C]
+    p=[]
+    if C<1 and N+1<len(S) and (r:=dfs(N+1,C+1))>=0:p.append(r)
+    if N+2<len(S) and (r:=dfs(N+2,0))>=0:p.append(r)
+    if p:dp[N][C]=max(p)+(S[N] if N!=-1 else 0)
+    else:p=-2
+    return dp[N][C]
+print(dfs(-1,-1))
+N,X=map(int,input().split())
+T=list(map(int,input().split()))
+i=0
+while True:
+    if T[i]<X:break
+    X+=1
+    i=(i+1) if i<N-1 else 0
+print(i+1)
+
+p=[float(input()) for _ in range(10)]
+p.sort(reverse=True)
+a=1
+for k in p[:9]:
+    a*=k
+for k in [i for i in range(1,10)]:
+    a/=k
+print(a*10**9)
+#include <iostream>
+using namespace std;
+
+int main() {
+    int N;
+    cin >> N;
+    int l = 1, r = 1000000;
+    int f=1,l=N;
+    while(true){
+        int day=(f+l)/2
+        cout <<"? "<<day<<endl;
+        int s;
+        cin <<s;
+        int w=day-s;
+        if(s==w){
+            cout <<"! "<<day<<endl;
+            return();
+        }
+        if(s>w) f=day+1;
+        else l=day-1;
+    }
+}
+import sys
+input=sys.stdin.read
+def print(str):
+    sys.stdout.write(str+"\n")
+    sys.stdout.flush()
+N=int(input())
+f=1
+l=N
+while True:
+    day=(f+l)//2
+    print("? "+str(day))
+    s=int(input())
+    w=day-s
+    if s==w:
+        print("! "+str(day))
+        exit()
+    if s>w:
+        f=day+1
+    else:
+        l=day-1
+
+    
+
+N=int(input())
+E={i:[False]*(N+1) for i in range(1,N+1)}
+for _ in range(int(input())):
+    f,t=map(int,input().split())
+    E[f][t]=True
+    E[t][f]=True
+bfs=[1]
+visit=[False]*(len(E)+1)
+visit[1]=True
+while bfs:
+    nb=[]
+    for b in bfs:
+        for i,n in enumerate(E[b]):
+            if n and not visit[i]:
+                nb.append(i)
+                visit[i]=True
+    bfs=nb
+print(visit.count(True)-1)
+
+a,b=map(int,input().split())
+gcd=1
+for i in range(1,min(a,b)):
+    if a%i==0 and b%i==0:
+        gcd=i
+print(gcd)
+print(int(a/gcd*b))
+import sys
+from collections import deque
+sys.setrecursionlimit(10**7)
+input = sys.stdin.readline
+N,M = map(int,input().split())
+L = [list(map(int,input().split()))[1:] for _ in range(M)]
+child = [[] for _ in range(N+1)]
+parent = [[] for _ in range(N+1)]
+for l in L:
+    for i in range(len(l)-1):
+        f,t = l[i:i+2]
+        parent[t].append(f)
+        child[f].append(t)  
+visit = [False]*(N+1) 
+indegree = [len(parent[idx]) for idx in range(N+1)]
+Q = deque()
+ans = []
+def checkCycle(here,V):
+    if V[here]:
+        return V[here]==-1
+    V[here] = -1
+    for c in child[here]:
+        if checkCycle(c,V):
+            return True
+    V[here] = 1
+    return False
+for i in range(1,N+1):
+    if indegree[i]==0:
+        Q.append(i)
+        visit[i]=True
+if any([checkCycle(idx,[0]*(N+1)) for idx in range(1,N+1)]):
+    print(0)
+    exit()
+while Q:
+    k = Q.popleft()
+    ans.append(k)
+    for c in child[k]:
+        if not visit[c]:
+            indegree[c]-=1
+            if indegree[c]==0:
+                Q.append(c)
+                visit[c]=True
+print(*ans,sep="\n")
+N=int(input())
+P=[]
+def chk(r,c,size):
+    for i in range(size):
+        for j in range(size):
+            if not P[r+i][c+j]==P[r][c]:
+                size=size//2
+                ta,tb=0,0
+                for x in range(2):
+                    for y in range(2):
+                        a,b=chk(r+x*size,c+y*size,size)
+                        ta+=a
+                        tb+=b
+                return (ta,tb)
+    return (1,0) if P[r][c]=='0' else (0,1)
+for _ in range(N):
+    P.append(input().split())
+print(*chk(0,0,N))
+
+file=open("input.txt")
+_,*M=[list(map(int,l.split())) for l in file.readlines()]
+drdc=[[0,1],[0,-1],[1,0],[-1,0]]
+def two(adj):
+    global M
+    while adj:
+        n_adj=[]
+        for r,c in adj:
+            if M[r][c]==2:continue
+            M[r][c]=2
+            for dr,dc in drdc:
+                nr=r+dr;nc=c+dc
+                if 0<=nr<len(M) and 0<=nc<len(M[0]) and M[nr][nc]==0:
+                    n_adj.append([nr,nc])
+        adj=n_adj
+time=0
+two([[0,0]])
+while True:
+    adj=[]
+    cheese=False
+    for r in range(len(M)):
+        for c in range(len(M[0])):
+            if M[r][c]!=1:continue
+            cheese=True
+            cnt=0
+            for dr,dc in drdc:
+                nr=r+dr;nc=c+dc
+                if 0<=nr<len(M) and 0<=nc<len(M[0]) and M[nr][nc]==2:
+                    cnt+=1
+            if cnt>1:
+                M[r][c]=0
+                adj.append([r,c])
+    if not cheese:
+        print(time)
+        break
+    two(adj)
+    time+=1
+                
+A = [list(map(int, list(input()))) for _ in range(int(input()))]
+visit = [[False]*len(A) for _ in range(len(A))]
+def dfs(x, y):
+    visit[x][y] = True
+    C = 1
+    for dx, dy in [[1,0],[0,1],[-1,0],[0,-1]]:
+        nx, ny = x+dx, y+dy
+        if not (0<=nx<len(A) and 0<=ny<len(A)):continue
+        if visit[nx][ny]:continue
+        if A[nx][ny] == 0:continue
+        C += dfs(nx, ny)
+    return C
+T = sorted([dfs(i,j) for i in range(len(A)) for j in range(len(A)) if A[i][j]==1 and not visit[i][j]])
+print(len(T))
+print(*T, sep='\n')
+    
+for _ in range(int(input())):
+    a=""
+    N,word=input().split()
+    N=int(N)
+    for w in word:
+        a+=w*N
+    print(a)
+N,M=map(int,input().split())
+bfs=[N]
+visit=[False]*(10**10)
+if N==M:bfs=[]
+cnt=0
+while bfs:
+    nb=[]
+    for b in bfs:
+        x,y,z=b*2,b+1,b-1
+        if M in [x,y,z]:
+            nb=[]
+            break
+        else:
+            if not visit[x]:
+                visit[x]=True
+                nb.append(x)
+            if not visit[y]:
+                visit[y]=True
+                nb.append(y)
+            if z>-1 and not visit[z]:
+                visit[z]=True
+                nb.append(z)
+    nb.sort(reverse=True)
+    bfs=nb
+    cnt+=1
+print(cnt)
+N = int(input())
+A = list(map(int,input().split()))
+primes = []
+def initPrimes(n):
+    A = [True]*(n+1)
+    A[0] = A[1] = False
+    for i in range(2,n+1):
+        if A[i]:
+            primes.append(i)
+            for j in range(i*i,n+1,i):
+                A[j] = False
+
+def factorize(n):
+    T = {}
+    for p in primes:
+        if p*p > n:
+            break
+        while n % p == 0:
+            if not p in T:
+                T[p] = 0
+            T[p] += 1
+            n //= p
+    if n > 1:
+        if not n in T:
+            T[n] = 0
+        T[n] += 1
+    keys = []
+    values = []
+    for k in sorted(T.keys()):
+        keys.append(k)
+        values.append(T[k])
+    return [keys,values]
+def plusOne(ref,now):
+    for i in range(len(ref)):
+        if ref[i] > now[i]:
+            now[i] += 1
+            return True
+        else:
+            now[i] = 0
+    return False
+def mult(factor,pow):
+    res = 1
+    for i in range(len(factor)):
+        res *= factor[i]**pow[i]
+    return res
+initPrimes(10**6)
+ans = [0]*N
+orgIdx = {i:idx for idx,i in enumerate(A)}
+visited = {}
+A.sort()
+for idx,a in enumerate(A):
+    keys,values = factorize(a)
+    now = [0]*len(keys)
+    while True:
+        factor = mult(keys,now)
+        if factor in visited:
+            ans[orgIdx[factor]] += 1
+            ans[orgIdx[a]] -= 1
+        if not plusOne(values,now):
+            break
+    visited[a] = idx
+print(*ans)
+import sys
+input = sys.stdin.readline
+N=[list(input().strip()) for _  in range(int(input()))]
+for n in N:
+    if all([int(d) in [0,1] for d in n]):
+        print("Hello, BOJ 2023!")
+        continue
+    C=[(0,'')]
+    for idx in range(len(n)):
+        nC=[]
+        for acc,now in C:
+            nC.append((acc+int(now+n[idx]),''))
+            if idx<len(n)-1:nC.append((acc,now+n[idx]))
+        C=nC
+    C.sort()
+    m=1
+    cnt=0
+    idx=0
+    while True:
+        power=sum([int(d)**m for d in n])
+        if power>int(''.join(n)):break
+        while C[idx][0]<=power:
+            if power==C[idx][0]:
+                cnt+=1
+                break
+            idx+=1
+        m+=1
+    print(cnt)
+
+class TreeNode:
+  def __init__(self, key, val):
+    self.key = key
+    self._leftChild = None
+    self._rightChild = None
+    self.parent = None
+
+  @property
+  def leftChild(self):
+    return self._leftChild
+
+  @leftChild.setter
+  def leftChild(self, node):
+    if self._leftChild:
+      self._leftChild.parent = None
+    if node:
+      node.parent = self
+    self._leftChild = node
+
+  @property
+  def rightChild(self):
+    return self._rightChild
+
+  @rightChild.setter
+  def rightChild(self, node):
+    if self._rightChild:
+      self._rightChild.parent = None
+    if node:
+      node.parent = self
+    self._rightChild = node
+
+  def isRoot(self):
+    return not self.parent
+
+  def isLeaf(self):
+    return not (self.rightChild or self.leftChild)
+
+  def hasLeftChild(self):
+    return self.leftChild is not None
+
+  def hasRightChild(self):
+    return self.rightChild is not None
+
+  def isLeftChild(self):
+    return self.parent and self.parent.leftChild is self
+
+  def isRightChild(self):
+    return self.parent and self.parent.rightChild is self
+
+  def hasAnyChildren(self):
+    return not self.isLeaf()
+
+  def hasBothChildren(self):
+    return self.hasLeftChild() and self.hasRightChild()
+
+  def findSuccessor(self):
+    succ = None
+    if self.hasRightChild():
+      succ = self.rightChild
+      while succ.hasLeftChild():
+        succ = succ.leftChild
+    return succ
+
+  def sliceOut(self):
+    '''트리 내에서 현재 노드를 잘라낸다.
+    단, 이 동작은 successor가 되는 노드에만
+    한정되는 것으로 간주한다.
+    따라서, 현재노드는 왼쪽 자식이 없어야 한다'''
+    child = self.rightChild if self.hasRightChild() else None
+    self.rightChild = None
+    if self.isLeftChild():
+      self.parent.leftChild = child
+    elif self.isRightChild():
+      self.parent.rightChild = child
+    # !!! the successor node never has a left child.
+class BinarySearchTree:
+  def __init__(self):
+    self.root = None
+    self.length = 0
+
+  def put(self, key, val):
+    if self.root is not None:
+      self.__put(key, val, self.root)
+    else:
+      self.root = TreeNode(key, val)
+    self.length += 1
+
+  def __put(self, key, val, currentNode):
+    targetNode = currentNode
+    while True:
+      if key < targetNode.key:
+        if not targetNode.hasLeftChild():
+          targetNode.leftChild = TreeNode(key, val)
+          break
+        else:
+          targetNode = targetNode.leftChild
+      else:
+        if not targetNode.hasRightChild():
+          targetNode.rightChild = TreeNode(key, val)
+          break
+        else:
+          targetNode = targetNode.rightChild
+    self.length += 1
+
+  def get(self, key):
+    if self.root:
+      res = self.__get(key, self.root)
+      if res:
+        return res.value
+    return None
+
+  def __get(self, key, currentNode):
+    targetNode = currentNode
+    while True:
+      if targetNode.key == key:
+          return targetNode
+      elif key < currentNode.key:
+        if targetNode.hasLeftChild():
+          targetNode = targetNode.leftChild
+        else:
+          return None
+      else:
+        if targetNode.hasRightChild():
+          targetNode = targetNode.rightChild
+        else:
+          return None
+
+  def delete(self, key):
+    if self.length == 1 and self.root.key == key:
+      self.root = None
+      self.length = 0
+      return
+    node_to_delete = self.__get(key, self.root)
+    if not node_to_delete:
+      raise KeyError('There is no key in the tree.')
+    if node_to_delete.isLeaf():
+      if node_to_delete.isLeftChild():
+        node_to_delete.parent.leftChild = None
+      else:
+        node_to_delete.parent.rightChild = None
+    elif node_to_delete.hasBothChildren():
+      succ = node_to_delete.findSuccessor()
+      succ.sliceOut()
+      node_to_delete.key, node_to_delete.value = succ.key, succ.value
+    else:
+      child = node_to_delete.leftChild \
+              if node_to_delete.hasLeftChild() else\
+              node_to_delete.rightChild
+      node_to_delete.leftChild = None
+      node_to_delete.rightChild = None
+      if node_to_delete.isRoot():
+        self.root = child
+      elif node_to_delete.isLeftChild():
+        node_to_delete.parent.leftChild = child
+      else:
+        node_to_delete.parent.rightChild = child
+    self.length -= 1
+N,K=map(int,input().split())
+A=list(map(int,input().split()))
+nodes=[Node((A[i],i)) for i in range(N)]
+P=sorted([(A[i],i) for i in range(K)],reverse=True)
+answer=N*N
+for i in range(1,K):
+    insert(nodes[P[i-1][1]],nodes[P[i][1]])
+    answer+=abs(P[i-1][1]-P[i][1])
+for i in range(K,N):
+    L=nodes[i-K]
+    acc=answer+abs(nodes[i-K].next.value-nodes[i-K].prev.value)-abs(nodes[i-K].value-nodes[i-K].prev.value)-abs(nodes[i-K].value-nodes[i-K].next.value)
+    pop(nodes[i-K])
+    P.pop(0)
+    pos=bisect_left(P,(A[i],i))
+    if 0<pos<K-1:acc-=abs(P[pos-1]+P[pos])
+    if pos>0: acc+=abs(P[pos-1]-A[i])
+    if pos<K-1:acc+=abs(P[pos]-A[i])
+print(answer)
+h,m=map(int,input().split())
+print(h if m>=45 else (h-1 if h>0 else 23), m-45 if m>=45 else m+15)
+N=[int(k) for k in open(0).readlines()][1:]
+print(sorted(N))
+import sys
+input = sys.stdin.readline
+A = [list(range(1,15))]
+for _ in range(14):
+    S = 0
+    T = []
+    for i in range(14):
+        S += A[-1][i]
+        T.append(S)
+    A.append(T)
+for _ in range(int(input())):
+    K = int(input())
+    N = int(input())
+    print(A[K][N-1])
+
+from itertools import combinations
+N,M = map(int,input().split())
+L = list(map(int,input().split()))
+print(max([sum(x) for x in combinations(L,3) if sum(x)<=M]))
+
+import sys
+input = sys.stdin.readline
+N,M = map(int,input().split())
+A = list(map(int,input().split()))
+left = 0
+right = 1000000000
+while left<right:
+    mid = (left+right)//2 + (left+right)%2
+    total = 0
+    for a in A:
+        total += max(0,a-mid)
+    if total>=M:
+        left = mid
+    else:
+        right = mid-1
+print(left)
+
+N = int(input())
+i = N//5
+while i>=0:
+    if (N-5*i)%3==0:
+        print(i+(N-5*i)//3)
+        exit()
+    i-=1
+print(-1)
+A,B,V = map(int,input().split())
+print((V-A-1)//(A-B)+2)
+N = 0
+for i in range(3):
+    T = input()
+    if T.isdigit():
+       N = int(T) + (3-i)
+if N%3==0 and N%5==0:
+    print("FizzBuzz")
+elif N%3==0:
+    print("Fizz")
+elif N%5==0:
+    print("Buzz")
+else:
+    print(N)
+import sys
+from heapq import heappop, heappush
+input = sys.stdin.readline
+N = int(input())
+A = list(map(int,input().split()))
+M = [list(map(int,input().split())) for _ in range(int(input()))]
+now = [(0,A)]
+goal = sorted(A)
+visited = set()
+while now:
+    cost, nowA = heappop(now)
+    if tuple(nowA) in visited:
+        continue
+    visited.add(tuple(nowA))
+    if nowA == goal:
+        print(cost)
+        exit()
+    for a,b,c in M:
+        newA = nowA[:]
+        newA[a-1],newA[b-1] = newA[b-1],newA[a-1]
+        if not tuple(newA) in visited:
+            heappush(now,(cost+c,newA))
+print(-1)
+
+import sys
+from heapq import heappush, heappop
+input = sys.stdin.readline
+N = int(input())
+P = [tuple(map(int,input().split())) for _ in range(N)]
+x,y,z = 0,1,2
+prev,next = 0,1
+class Node:
+    def __init__(self, v):
+        self.val = v
+        self.neighbor = [[None,None],[None,None],[None,None]]
+        self.visit = False
+    def __lt__(self, other):
+        return True
+    def remove(self):
+        self.visit = True
+        for axis in range(3):
+            if self.neighbor[axis][prev]:
+                self.neighbor[axis][prev].neighbor[axis][next] = self.neighbor[axis][next]
+            if self.neighbor[axis][next]:
+                self.neighbor[axis][next].neighbor[axis][prev] = self.neighbor[axis][prev]
+    def __str__(self) -> str:
+        return str(self.val)
+
+
+nodes = [Node(p) for p in P]
+
+
+P_sx = sorted(nodes,key=lambda a:a.val[x])
+P_sy = sorted(nodes,key=lambda a:a.val[y])
+P_sz = sorted(nodes,key=lambda a:a.val[z])
+
+P_x = {v:i for i,v in enumerate(P_sx)}
+P_y = {v:i for i,v in enumerate(P_sy)}
+P_z = {v:i for i,v in enumerate(P_sz)}
+
+P_dict = [P_x,P_y,P_z]
+P_sort = [P_sx,P_sy,P_sz]
+
+
+for n in nodes:
+    for axis in range(3):
+        if P_dict[axis][n] != 0:
+            n.neighbor[axis][prev] = P_sort[axis][P_dict[axis][n]-1]
+        if P_dict[axis][n] != N-1:
+            n.neighbor[axis][next] = P_sort[axis][P_dict[axis][n]+1]
+
+
+def calc_cost(node1,node2):
+    return min([abs(node1.val[x]-node2.val[x]),abs(node1.val[y]-node2.val[y]),abs(node1.val[z]-node2.val[z])])
+ans = 0
+PQ = [[0,nodes[0]]]
+while PQ:
+    cost,now = heappop(PQ)
+    if now.visit:
+        continue
+    ans += cost
+    now.remove()
+    for axis in range(3):
+        if n:=now.neighbor[axis][prev]:
+            heappush(PQ,(calc_cost(n,now),n))
+        if n:=now.neighbor[axis][next]:
+            heappush(PQ,(calc_cost(n,now),n))
+print(ans)
+        
+import sys
+input = sys.stdin.readline
+XYZ = [list(map(int,input().split())) for _ in range(int(input()))]
+def dis(A,B):
+    x1,y1,z1 = A
+    x2,y2,z2 = B
+    return min([abs(x1-x2),abs(y1-y2),abs(z1-z2)])
+a,b=map(int,[str(x)[::-1] for x in input().split()])
+print(a if a>b else b)
+print('ascending' if (a:=input())=='1 2 3 4 5 6 7 8' else 'descending' if a=='8 7 6 5 4 3 2 1' else "mixed" )
+import sys
+from queue import heappop,heappush
+input = iter(open(0).read().split("\n")).__next__
+H,W,N = map(int,input().split())
+S = [list(map(int,input().split())) for _ in range(H)]
+answer = -1
+for w in range(1,min(N,W+1)):
+    if N%w!=0 or N//w>H:continue
+    cnt = {}
+    high = []
+    low = []
+    for i in range(N//w):
+        for j in range(w):
+            if cnt.get(S[i][j])==None:
+                cnt[S[i][j]] = 1
+            else: 
+                cnt[S[i][j]] += 1
+            heappush(high,-S[i][j])
+            heappush(low,S[i][j])
+    answer = max(-high[0]-low[0],answer)
+    for r in range(N//w,H+1):
+        Range = range(w,W) if (r-N//w)%2==0 else range(W-w,-1,-1)
+        for c in Range:
+            appendCol = c
+            removeCol = c-w if (r-N//w)%2==0 else c+w-1
+            for rr in range(r-N//w,r):
+                heappush(high,-S[rr][appendCol])
+                heappush(low,S[rr][appendCol])
+                cnt[S[rr][removeCol]] -= 1
+                if cnt.get(S[rr][appendCol])==None:
+                    cnt[S[rr][appendCol]] = 1
+                else: 
+                    cnt[S[rr][appendCol]] += 1
+            while cnt[-high[0]]==0:
+                heappop(high)
+            while cnt[low[0]]==0:
+                heappop(low)            
+            answer = max(-high[0]-low[0],answer)
+        if r == H:break
+        Range = range(W-w,W) if (r-N//w)%2==0 else range(w)
+        for c in Range:
+            cnt[S[r-N//w][c]] -= 1
+            heappush(high,-S[r][c])
+            heappush(low,S[r][c])
+            if cnt.get(S[r][c])==None:
+                cnt[S[r][c]] = 1
+            else: 
+                cnt[S[r][c]] += 1
+            while cnt[-high[0]]==0:
+                heappop(high)
+            while cnt[low[0]]==0:
+                heappop(low)
+        answer = max(-high[0]-low[0],answer)
+print(answer if N!=1 else 0)
+import sys
+input = sys.stdin.readline
+L = [len([x for x in input().strip().split('0') if x!=""]) for _ in range(int(input().split()[0]))]
+print(max(L),L.count(max(L)))
+print("Goose" if int(input())%2==1 else "Duck")
+a={}
+for _ in range(10):
+    a[int(input())%42]=0
+print(len(a))
+s = input()
+idx = 0
+for i in range(len(s)):
+    if "KOREA"[idx%5] == s[i]:
+        idx += 1
+print(idx)
+import sys
+input = sys.stdin.readline
+N,D = map(int,input().split())
+X = [list(map(int,input().split())) for _ in range(N)]
+M = []
+A = []
+for a,x in X:
+    if a==1:
+        M.append(x)
+    else:A.append(x)
+Na = len(A)
+A.sort(reverse=True)
+M.sort()
+ans = 0
+for m in M:
+    while D<=m:
+        if len(A)==0:
+            print(ans+Na)
+            exit()
+        a = A.pop()
+        D *= a
+    ans += 1
+    D += m
+print(ans+Na)
+import sys
+input = sys.stdin.readline
+A = [list(input().strip()) for _ in range(int(input().split()[0]))]
+B = [list(input().strip()) for _ in range(len(A))]
+def fill(r,c,org,to):
+    if A[r][c]==to.lower():
+        return
+    A[r][c]=to
+    for dr,dc in [[-1,0],[0,-1],[0,1],[1,0]]:
+        nr,nc = r+dr,c+dc
+        if 0<=nr<len(A) and 0<=nc<len(A[0]) and A[nr][nc]==org:
+            fill(nr,nc,org,to)
+for r in range(len(A)):
+    for c in range(len(A[0])):
+        fill(r,c,A[r][c],B[r][c].lower())
+        print(*A,sep="\n",end="\n\n")
+        print(*B,sep="\n",end="\n\n")
+for r in range(len(A)):
+    for c in range(len(A[0])):
+        if A[r][c]!=B[r][c].lower():
+            print("NO")
+            exit()
+print("YES")
+input()
+A=list(map(int,input().split()))
+B=list(map(int,input().split()))
+X=list(map(int,input().split()))
+gap = [a-b for a,b in zip(A,B)]
+times = [abs(g//x) for g,x in zip(gap,X) if g%x==0]
+if len(times)!=len(gap):
+    print(-1)
+    exit()
+if not all([t%2==times[0]%2 or X[i]==0 for i,t in enumerate(times)]):
+    print(-1)
+    exit()
+print(max(times))
+import sys
+input = sys.stdin.readline
+ans = []
+def getMinLargeRoot(n):
+    # get minimum integer x where the sqaure root of (x) is Integer and x>=n
+    if n==0:return 0
+    if n==1:return 1
+    l,r = 1,n
+    while l<r:
+        m = (l+r)//2
+        if m*m>=n:
+            r = m
+        else:
+            l = m+1
+    return l
+for _ in range(int(input())):
+    N = int(input())
+    D = getMinLargeRoot(N)
+    rows = N//D
+    rows += 1 if N%D!=0 else 0
+    ans.append(rows*2+D*2)
+print("\n".join(map(str,ans)))
+    
+N = int(input())
+L = list(map(int, input().split()))
+T, P = map(int, input().split())
+print(sum([l//T + (l%T > 0) for l in L]))
+print(N//P, N%P)
+N = int(input())
+L = input().split()
+fruits = [[-1,-1],[-1,-1]]
+ans = min(2, N)
+start = 0
+for idx, l in enumerate(L):
+    if len(fruits) == 2 and not l in [fruits[0][0], fruits[1][0]]:
+        start = fruits[0][1] + 1
+        fruits[0] = fruits[1]
+        fruits[1] = [l, idx, idx]
+    else:
+        if l == fruits[0][0]:
+            fruits[0][1] = idx
+        elif l == fruits[1][0]:
+            fruits[1][1] = idx
+    ans = max(ans, idx - start + 1)
+print(ans)
+from collections import defaultdict
+input()
+N = list(map(int, input().split()))
+input()
+M = list(map(int, input().split()))
+A = []
+Ndict = defaultdict(list)
+Mdict = defaultdict(list)
+for i in range(len(N)):
+    Ndict[N[i]].append(i)
+for j in range(len(M)):
+    Mdict[M[j]].append(j)
+ans = []
+Nidx, Midx = 0, 0
+for i in range(100, -1, -1):
+    if Ndict[i] and Mdict[i]:
+        x,y = 0,0
+        while x < len(Ndict[i]) and Ndict[i][x] < Nidx:
+            x += 1
+        while y < len(Mdict[i]) and Mdict[i][y] < Midx:
+            y += 1
+        while x < len(Ndict[i]) and y < len(Mdict[i]):
+            ans.append(i)
+            Nidx = Ndict[i][x]
+            Midx = Mdict[i][y]
+            x+=1
+            y+=1
+print(len(ans))
+print(*ans)
+        
+N = int(input())
+F = [list(map(int,input().split())) for _ in range(2)]
+S = []
+for f in F:
+    s=[0]
+    for ff in f:
+        s.append(s[-1]+ff)
+    S.append(s)
+A = [0,0]
+B = [1,N-1]
+total = S[0][-1]+S[1][-1]
+def calc(isA,A,B):
+    x,y = A
+    i,j = B
+    if x==i:
+        center = (y+j-1)//2+1
+        T = S[0][center+1] + S[1][center+1]
+    else:
+        center = (y+j)//2
+        T = S[x][center+1] + S[x][center]
+    if isA: return T
+    else: return total - T
+TA = 0
+TB = 0
+def move(org):
+    x,y = org
+    return [[x+dx,y+dy] for dx,dy in [[0,1],[1,0],[-1,0],[0,-1]] if 0<=dx+x<2 and 0<=dy+y<N]
+for i in range(N):
+    A = max(move(A),key = lambda x:calc(True,x,B))
+    TA += F[A[0]][A[1]]
+    B = max(move(B),key = lambda x:calc(True,A,x))
+    TB += F[B[0]][B[1]]
+print(TA,TB)
+import sys
+input = sys.stdin.readline
+for _ in range(int(input())):
+    Ta,Tb,A,B = map(int,input().split())
+    finB = Tb*B
+    if Ta*A <= finB:
+        print(finB)
+    else:
+        timeWhenBDone = (finB//Ta)*Ta
+        gap = finB - timeWhenBDone
+        R = A - finB//Ta
+        if gap == 0:
+            time = 0
+            cnt = 0
+            while cnt<R:
+                cnt += 2
+                time += Ta
+            print(timeWhenBDone+time)
+        else:
+            time = Ta
+            jump = [gap,Ta-gap]
+            cnt = 1
+            while cnt<R:
+                cnt += 1
+                time += jump[cnt%2]
+            print(timeWhenBDone+time)
+
+import sys
+input = sys.stdin.readline
+W,H,K,T = map(int, input().split())
+V = [tuple(map(int, input().split())) for _ in range(K)]
+A = 1
+for x,y in V:
+    top = max(1,y-T)
+    bottom = min(H,y+T)
+    left = max(1,x-T)
+    right = min(W,x+T)
+    dots = (bottom-top+1)*(right-left+1)
+    A = A*dots%998244353
+print(A)
+
+import sys
+input = sys.stdin.readline
+K = int(input())
+N = [input().strip() for _ in range(K)]
+R = [None]*K
+T = [i for i in range(K)]
+V = [False]*K
+for _ in range(K-1):
+    a,b = map(int,input().split())
+    R[T[a-1]] = b-1
+    T[a-1] = T[b-1]
+    V[b-1] = True
+start = V.index(False)
+A = ''
+while start != None:
+    print(N[start],end='')
+    start = R[start]
+print(A)
+
+input()
+print(input().split().count(input()))
+N = int(input())
+K = list(map(int,input().split()))
+if K[0]==0:K=K[1:]
+if not K:
+    print("NO")
+else:
+    print("YES")
+    print(K[0]*111)
+p = input().split()
+e = [["5","0"],["2","5"],["0","2"]]
+if p in e: print(">")
+elif p[::-1] in e: print("<")
+elif p[0] == p[1]: print("=")
+elif p[1] not in ("5", "2", "0") and p[0] not in ("5", "2", "0"): print("=")
+else: print(">" if p[0] in ("5", "2", "0")  else "<")
+n = int(input())
+s = sum(1 if int(x)%2==0 else 0 for x in list(input()))
+if s > n-s: print("0")
+elif s < n-s: print("1")
+else: print("-1")
+a,b = map(int,input().split())
+print(int(b >> (a-1)))
+n = int(input())
+by = {}
+byl = [input().split() for _ in range(n)]
+byl.sort(key=lambda x: (int(x[1])*7 + int(x[2])))
+sbn = {}
+for _ in range(n):
+    a,b = input().split()
+    sbn[a] = int(b)
+prv = 0
+ans = 0
+mAns = 0
+for name, w, d, c in byl:
+    w,d,c = int(w),int(d),int(c)
+    if sbn[name] < c:
+        continue
+    if w*7 + d == prv:
+        continue
+    if w*7 + d == prv + 1:
+        ans += 1
+    else:
+        mAns = max(mAns, ans)
+        ans = 1
+    prv = w*7 + d
+print(max(mAns, ans))
+
+N = int(input())
+nums = list(map(int, input().split()))
+
+def findSortedMin(tar):
+    pos = [[i,v] for i,v in enumerate(nums)]
+    ans = 0
+    for i in range(N):
+        for ii in range(N):
+            if tar[i] == pos[ii][1]:
+                ans += abs(pos[ii][0]-i)
+                pos[ii][0] = -1
+                break
+            else:
+                pos[ii][0] += 1
+    return ans
+
+print(min(findSortedMin(sorted(nums)), findSortedMin(sorted(nums, reverse=True))+1))
+
+    
+
+
+        
+import sys
+from queue import deque
+input = sys.stdin.readline
+N=int(input())
+A=[list(map(int,input().split())) for _ in range(int(input()))]
+I=[input().split() for _ in range(int(input()))][::-1]
+M=[[0]*N for _  in range(N)]
+M[0][0]=1
+for r,c in A:
+    M[r-1][c-1]=3
+B=deque([[0,0]])
+dir=[1,1]
+time=0
+def move():
+    r,c=B[-1]
+    nr= r + (dir[1] if dir[0]==0 else 0)
+    nc= c + (dir[1] if dir[0]==1 else 0)
+    if not (0<=nr<N and 0<=nc<N):return False
+    if M[nr][nc]==1:return False
+    B.append([nr,nc])
+    if M[nr][nc]!=3:
+        r,c=B.popleft()
+        M[r][c]=0
+    M[nr][nc]=1
+    return True
+
+while True:
+    if not move():
+        print(time+1)
+        break
+    time+=1
+    if I and int(I[-1][0])==time:
+        _,D=I.pop()
+        dir=[int(not dir[0]),dir[1]*(1 if D=="D" else -1)*(-1 if dir[0]==0 else 1)]
+
+
+
+
+N,M,K = map(int, input().split())
+virus = set(map(int, input().split()))
+log = [list(map(int, input().split())) for _ in range(M)]
+log.sort(key=lambda x: x[0])
+for v in virus:
+    die = set([v])
+    for _, frm, to in log:
+        if frm in die:
+            die.add(to)
+    if die == virus:
+        print(v)
+        break
+T, N = map(int, input().split())
+L, K = map(int, input().split())
+danger = list(map(int, input().split()))
+safe = list(map(int, input().split()))
+
+
+def bisect(arr, target):
+    left = 0
+    right = len(arr) - 1
+    while left < right:
+        mid = (left + right) // 2
+        if arr[mid][0] < target:
+            left = mid + 1
+        else:
+            right = mid
+    return right
+
+def find(arr, frm, target):
+    for i in range(frm, len(arr)):
+        if arr[i][1] >= target:
+            return i
+    return -1
+
+
+segment = None
+
+
+def makeSegmentTree(arr):
+    global segment
+    segment = [[x[1] for x in arr]]
+    while len(segment[-1]) > 1:
+        segment.append([])
+        for i in range(0, len(segment[-2]), 2):
+            segment[-1].append(max(segment[-2][i] ,segment[-2][i+1] if i+1 < len(segment[-2]) else 0))
+    segment = segment[::-1]
+
+def find(tar, level, idx, following):
+    if len(segment) - 1 == level:
+        if  segment[level][idx] >= tar:
+            return idx
+        elif idx + 1 < len(segment[level]) and segment[level][idx+1] >= tar:
+            return idx + 1
+        return -1
+    if segment[level+1][idx*2] >= tar:
+        return find(tar, level+1, idx*2)
+    return find(tar, level+1, idx*2+1) if idx*2+1 < len(segment[level+1]) else -1
+
+def dfs(childIdx,level):
+    if level == len(segment) - 1:
+        return childIdx[level]
+    if childIdx[level] == "0":
+        
+
+
+def query(frm, tar):
+    global segment
+    ans = 0
+    idx = bin(frm)[2:].zfill(len(segment)-1)
+    for i in range(len(idx)):
+        if idx[i] == '0':
+            left 
+    return ans
+    
+    
+    
+
+
+danger.append(T)
+D=[]
+for i in range(len(danger)-1):
+    D.append([danger[i], danger[i+1] - danger[i]])
+print(D)
+makeSegmentTree(D)
+print(segment)
+time = 1
+for i in range(len(safe)-1):
+    if safe[i+1] - safe[i] == 1:
+        time += 1
+    else:
+        gap = safe[i+1] - safe[i] - 1
+        idx = bisect(D, time%(2*T))
+        waitFor = find(D, idx, gap)
+        if waitFor != -1:
+            time += (D[waitFor][0] - (time%(2*T)) -1 + gap)
+        else:
+            print("What is that map newbie...")
+            exit()
+print(time+1)
+
+
+        
+
+for _ in range(int(input())):
+    bitMask = [bin(x)[2:].zfill(3) for x in list(map(int, input().split()))]
+    print("YES" if any([all([mask[i] == bitMask[0][i] for mask in bitMask]) for i in range(3)]) else "NO")
+    
+    
+
+import sys
+input = sys.stdin.readline
+while True:
+    a,b,c = map(int,input().split())
+    if sum([a,b,c]) == 0:
+        break
+    if max([a,b,c])**2 == sum([x**2 for x in [a,b,c] if x!=max([a,b,c])]):
+        print("right")
+    else: print("wrong")
+import sys
+from heapq import heappush, heappop
+input = sys.stdin.readline
+XY = [list(map(float,input().split())) for _ in range(int(input()))]
+def dist(a,b):
+    x1,y1 = a
+    x2,y2 = b
+    return ((x1-x2)**2)+((y1-y2)**2)
+D = [[dist(a,b) for a in XY] for b in XY]
+A = 0
+H = [[0,0]]
+visit = [False]*len(XY)
+while H:
+    cost,node = heappop(H)
+    if visit[node]:continue
+    visit[node] = True
+    A += cost**(0.5)
+    for i in range(len(XY)):
+        heappush(H,(D[i][node],i))
+print(A)
